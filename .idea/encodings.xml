@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/backend/seckill-activity/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-activity/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-interface/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-interface/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-launcher/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-launcher/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-order/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-order/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-product/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-product/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-seckill/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-seckill/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-user/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/seckill-user/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>
