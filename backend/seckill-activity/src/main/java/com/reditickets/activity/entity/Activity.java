@@ -15,14 +15,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 秒杀活动实体类
+ * 秒杀活动实体
  */
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @TableName("t_activity")
-@ApiModel(value = "Activity", description = "秒杀活动表")
+@ApiModel(value = "Activity", description = "秒杀活动")
 public class Activity extends BaseEntity {
 
     @ApiModelProperty("活动名称")
@@ -57,7 +57,7 @@ public class Activity extends BaseEntity {
     @TableField("per_user_limit")
     private Integer perUserLimit;
 
-    @ApiModelProperty("状态：0未开始/1进行中/2已结束/3已取消")
+    @ApiModelProperty("状态：0未开始 / 1进行中 / 2已结束 / 3已取消")
     @TableField("status")
     private Integer status;
 

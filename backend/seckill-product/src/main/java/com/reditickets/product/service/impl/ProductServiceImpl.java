@@ -15,10 +15,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+/**
+ * 商品服务实现类
+ * <p>
+ * 继承 MyBatis Plus ServiceImpl 基类，实现商品分页查询、详情查询和库存扣减等核心业务逻辑
+ * </p>
+ *
+ * @author gugu
+ */
 @Slf4j
 @Service
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
 
+    /**
+     * 分页查询商品列表实现
+     * <p>
+     * 步骤：构建分页对象 → LambdaQueryWrapper 条件查询 → 分页查询 → Page.convert() 转换 VO → 返回
+     * </p>
+     */
     @Override
     public Result<Page<ProductVO>> listProducts(ProductListDTO dto) {
         // TODO: 1. 构建分页对象 Page<Product> page = new Page<>(dto.getPage(), dto.getSize());
@@ -41,6 +55,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         throw new UnsupportedOperationException("TODO: 实现商品列表查询");
     }
 
+    /**
+     * 商品详情查询实现
+     * <p>
+     * 步骤：查询商品 → 校验存在且未删除 → BeanUtils 转换 VO → 返回
+     * </p>
+     */
     @Override
     public Result<ProductVO> getProductById(Long id) {
         // TODO: 1. 使用 this.getById(id) 查询商品
@@ -56,6 +76,12 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
         throw new UnsupportedOperationException("TODO: 实现商品详情查询");
     }
 
+    /**
+     * 商品库存扣减实现
+     * <p>
+     * 步骤：LambdaUpdateWrapper 乐观锁扣减 → 校验扣减结果 → 同步 Redis 缓存 → 返回
+     * </p>
+     */
     @Override
     public Result<Void> deductStock(Long productId, Integer quantity) {
         // TODO: 1. 使用 LambdaUpdateWrapper 乐观锁扣减库存

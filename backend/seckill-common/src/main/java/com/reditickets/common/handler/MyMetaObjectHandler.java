@@ -7,14 +7,14 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 /**
- * 自定义元对象处理类
+ * 自定义元对象处理�?
  */
 @Component
 public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     /**
-     * 插入操作时填充字段
+     * 插入操作时填充字�?
      */
     public void insertFill(MetaObject metaObject) {
         LocalDateTime now = LocalDateTime.now();
@@ -24,7 +24,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override
     /**
-     * 更新操作时填充字段
+     * 更新操作时填充字�?
      */
     public void updateFill(MetaObject metaObject) {
         this.strictUpdateFill(metaObject, "updateTime", LocalDateTime.class, LocalDateTime.now());

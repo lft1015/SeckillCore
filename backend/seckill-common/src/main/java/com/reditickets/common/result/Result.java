@@ -4,6 +4,16 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 统一响应结果封装类
+ * <p>
+ * 所有接口返回值统一使用此类包装，包含状态码、消息和数据三部分，
+ * 提供 success() 和 fail() 静态工厂方法简化调用
+ * </p>
+ *
+ * @param <T> 响应数据类型
+ * @author gugu
+ */
 @Data
 public class Result<T> implements Serializable {
 

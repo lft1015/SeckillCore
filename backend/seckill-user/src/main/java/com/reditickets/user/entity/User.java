@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @TableName("t_user")
-@ApiModel(value = "User", description = "用户表")
+@ApiModel(value = "User", description = "用户")
 public class User extends BaseEntity {
 
     @ApiModelProperty("用户名")

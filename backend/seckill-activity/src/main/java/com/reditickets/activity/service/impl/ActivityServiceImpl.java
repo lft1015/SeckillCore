@@ -15,10 +15,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+/**
+ * 活动服务实现类
+ * <p>
+ * 继承 MyBatis Plus ServiceImpl 基类，实现活动分页查询、详情查询和库存扣减等核心业务逻辑
+ * </p>
+ *
+ * @author gugu
+ */
 @Slf4j
 @Service
 public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> implements ActivityService {
 
+    /**
+     * 分页查询活动列表实现
+     * <p>
+     * 步骤：构建分页对象 → LambdaQueryWrapper 条件查询 → 分页查询 → Page.convert() 转换 VO → 返回
+     * </p>
+     */
     @Override
     public Result<Page<ActivityVO>> listActivities(ActivityListDTO dto) {
         // TODO: 1. 构建分页对象 Page<Activity> page = new Page<>(dto.getPage(), dto.getSize());
@@ -38,6 +52,12 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
         throw new UnsupportedOperationException("TODO: 实现活动列表查询");
     }
 
+    /**
+     * 活动详情查询实现
+     * <p>
+     * 步骤：查询活动 → 校验存在且未删除 → BeanUtils 转换 VO → 返回
+     * </p>
+     */
     @Override
     public Result<ActivityVO> getActivityById(Long id) {
         // TODO: 1. 使用 this.getById(id) 查询活动
@@ -53,6 +73,12 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
         throw new UnsupportedOperationException("TODO: 实现活动详情查询");
     }
 
+    /**
+     * 活动库存扣减实现
+     * <p>
+     * 步骤：LambdaUpdateWrapper + version 乐观锁扣减 → 校验扣减结果 → 返回
+     * </p>
+     */
     @Override
     public Result<Void> deductRemainingStock(Long activityId) {
         // TODO: 1. 使用乐观锁扣减剩余库存（版本号 version 控制）

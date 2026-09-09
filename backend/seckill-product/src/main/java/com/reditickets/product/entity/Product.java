@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @TableName("t_product")
-@ApiModel(value = "Product", description = "商品表")
+@ApiModel(value = "Product", description = "商品")
 public class Product extends BaseEntity {
 
     @ApiModelProperty("商品名称")

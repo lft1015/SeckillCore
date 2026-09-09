@@ -18,10 +18,24 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * 订单服务实现类
+ * <p>
+ * 继承 MyBatis Plus ServiceImpl 基类，实现订单创建、查询等核心业务逻辑
+ * </p>
+ *
+ * @author gugu
+ */
 @Slf4j
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
+    /**
+     * 创建秒杀订单实现
+     * <p>
+     * 步骤：生成订单号 → 构建 Order 实体 → this.save() 保存 → 发送 RocketMQ 延时消息 → 返回 OrderVO
+     * </p>
+     */
     @Override
     public Result<OrderVO> createOrder(CreateOrderDTO dto) {
         // TODO: 1. 生成订单号（雪花ID + 业务前缀）
@@ -49,6 +63,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         throw new UnsupportedOperationException("TODO: 实现创建订单逻辑");
     }
 
+    /**
+     * 根据订单ID查询订单详情实现
+     * <p>
+     * 步骤：this.getById() 查询 → 校验存在 → BeanUtils 转换 VO → 返回
+     * </p>
+     */
     @Override
     public Result<OrderVO> getOrderById(Long orderId) {
         // TODO: 1. 使用 this.getById(orderId) 查询订单
@@ -62,6 +82,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         throw new UnsupportedOperationException("TODO: 实现订单详情查询");
     }
 
+    /**
+     * 根据订单号查询订单详情实现
+     * <p>
+     * 步骤：LambdaQueryWrapper 按订单号查询 → 校验存在 → BeanUtils 转换 VO → 返回
+     * </p>
+     */
     @Override
     public Result<OrderVO> getOrderByOrderNo(String orderNo) {
         // TODO: 1. 使用 LambdaQueryWrapper 根据订单号查询
@@ -77,6 +103,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         throw new UnsupportedOperationException("TODO: 实现根据订单号查询订单");
     }
 
+    /**
+     * 分页查询用户订单列表实现
+     * <p>
+     * 步骤：构建分页对象 → LambdaQueryWrapper 条件查询 → 分页查询 → Page.convert() 转换 VO → 返回
+     * </p>
+     */
     @Override
     public Result<Page<OrderVO>> listUserOrders(OrderListDTO dto) {
         // TODO: 1. 构建分页对象 Page<Order> page = new Page<>(dto.getPage(), dto.getSize());

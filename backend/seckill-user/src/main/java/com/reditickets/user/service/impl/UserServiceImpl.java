@@ -15,10 +15,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+/**
+ * 用户服务实现类
+ * <p>
+ * 继承 MyBatis Plus ServiceImpl 基类，实现用户注册、登录、信息查询等核心业务逻辑
+ * </p>
+ *
+ * @author gugu
+ */
 @Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    /**
+     * 用户注册实现
+     * <p>
+     * 步骤：校验用户名唯一性 → BCrypt 加密密码 → 保存用户信息 → 返回结果
+     * </p>
+     */
     @Override
     public Result<Void> register(RegisterDTO dto) {
         // TODO: 1. 使用 LambdaQueryWrapper 校验用户名是否已存在
@@ -44,6 +58,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         throw new UnsupportedOperationException("TODO: 实现注册逻辑");
     }
 
+    /**
+     * 用户登录实现
+     * <p>
+     * 步骤：查询用户 → 校验状态 → BCrypt 验密 → 生成 JWT → 存入 Redis → 更新登录信息 → 返回 LoginVO
+     * </p>
+     */
     @Override
     public Result<LoginVO> login(LoginDTO dto) {
         // TODO: 1. 使用 LambdaQueryWrapper 根据用户名查询用户
@@ -84,6 +104,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         throw new UnsupportedOperationException("TODO: 实现登录逻辑");
     }
 
+    /**
+     * 根据用户ID查询用户信息
+     * <p>
+     * 步骤：查询用户 → 校验存在 → 转换为 UserVO（脱敏）→ 返回
+     * </p>
+     */
     @Override
     public Result<UserVO> getUserById(Long userId) {
         // TODO: 1. 使用 this.getById() 查询用户（ServiceImpl 内置方法）

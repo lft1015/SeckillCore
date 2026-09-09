@@ -14,14 +14,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 订单表
+ * 订单实体
  */
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @TableName("t_order")
-@ApiModel(value = "Order", description = "订单表")
+@ApiModel(value = "Order", description = "订单")
 public class Order extends BaseEntity {
 
     @ApiModelProperty("订单编号")
@@ -44,7 +44,7 @@ public class Order extends BaseEntity {
     @TableField("seckill_log_id")
     private Long seckillLogId;
 
-    @ApiModelProperty("状态：0待支付/1已支付/2已取消/3已退款")
+    @ApiModelProperty("状态：0待支付 / 1已支付 / 2已取消 / 3已退款")
     @TableField("order_status")
     private Integer orderStatus;
 

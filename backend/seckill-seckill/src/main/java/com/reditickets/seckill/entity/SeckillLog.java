@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @TableName("t_seckill_log")
-@ApiModel(value = "SeckillLog", description = "秒杀日志表")
+@ApiModel(value = "SeckillLog", description = "秒杀日志")
 public class SeckillLog extends BaseEntity {
 
     @ApiModelProperty("用户ID")
@@ -32,7 +32,7 @@ public class SeckillLog extends BaseEntity {
     @TableField("activity_id")
     private Long activityId;
 
-    @ApiModelProperty("状态：0待处理/1已下单/2已失败/3已取消")
+    @ApiModelProperty("状态：0待处理 / 1已下单 / 2已失败 / 3已取消")
     @TableField("status")
     private Integer status;
 

@@ -8,10 +8,25 @@ import com.reditickets.seckill.service.SeckillService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * 秒杀服务实现类
+ * <p>
+ * 实现秒杀执行和结果查询的核心业务逻辑，
+ * 涉及 Redis 库存预扣（Lua 脚本原子操作）、RocketMQ 异步下单、防重复秒杀等高性能方案
+ * </p>
+ *
+ * @author gugu
+ */
 @Slf4j
 @Service
 public class SeckillServiceImpl implements SeckillService {
 
+    /**
+     * 执行秒杀实现
+     * <p>
+     * 步骤：校验活动时间 → 防重复秒杀 → Redis Lua 原子预扣库存 → 标记用户已秒杀 → 发送 RocketMQ 异步下单 → 返回排队结果
+     * </p>
+     */
     @Override
     public Result<SeckillResultVO> executeSeckill(SeckillExecuteDTO dto) {
         // TODO: 1. 从 Redis 校验活动是否已开始 / 已结束
@@ -52,6 +67,12 @@ public class SeckillServiceImpl implements SeckillService {
         throw new UnsupportedOperationException("TODO: 实现秒杀执行逻辑");
     }
 
+    /**
+     * 查询秒杀结果实现
+     * <p>
+     * 步骤：从 Redis 查询结果缓存 → 若不存在则查数据库 → 组装 SeckillResultVO 返回
+     * </p>
+     */
     @Override
     public Result<SeckillResultVO> getSeckillResult(Long orderId) {
         // TODO: 1. 从 Redis 或数据库查询秒杀结果

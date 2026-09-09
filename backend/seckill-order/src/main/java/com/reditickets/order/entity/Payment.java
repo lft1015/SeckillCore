@@ -14,14 +14,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 支付流水表
+ * 支付流水实体
  */
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @TableName("t_payment")
-@ApiModel(value = "Payment", description = "支付流水表")
+@ApiModel(value = "Payment", description = "支付流水")
 public class Payment extends BaseEntity {
 
     @ApiModelProperty("支付编号（业务唯一标识）")
