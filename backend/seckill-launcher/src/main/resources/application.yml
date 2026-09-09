@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: optional:classpath:application-common.yml
   application:
     name: seckill-launcher
   main:
@@ -16,14 +18,7 @@ spring:
         enabled: false
         file-extension: yaml
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/seckill?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
+    url: jdbc:mysql://127.0.0.1:3306/seckill_core?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
 
 rocketmq:
   name-server: 127.0.0.1:9876
@@ -33,3 +28,13 @@ rocketmq:
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
   type-aliases-package: com.reditickets.*.entity
+  global-config:
+    db-config:
+      id-type: assign_id # 自动分配ID
+      logic-delete-field: isDeleted # 逻辑删除字段
+      logic-delete-value: 1 # 逻辑删除值为1
+      logic-not-delete-value: 0 # 逻辑未删除值为0
+      update-strategy: not_null # 更新策略为非空
+  configuration:
+    map-underscore-to-camel-case: true # 下划线映射为驼峰命名
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 日志实现为标准输出
