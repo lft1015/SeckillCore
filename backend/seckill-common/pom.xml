@@ -17,11 +17,24 @@
     <description>公共模块 - 通用工具类、常量、异常定义</description>
 
     <dependencies>
+        <!-- lombok 依赖：用于减少代码量 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- mybatis-plus 依赖：用于数据库操作 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+        <!-- swagger 依赖：用于生成 API 文档 -->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.13</version>
+        </dependency>
+        <!-- jackson 依赖：用于 JSON 序列化和反序列化 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
