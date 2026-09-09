@@ -17,11 +17,6 @@
     <description>网关模块 - 基于 Spring Cloud Gateway 的统一入口</description>
 
     <dependencies>
-        <dependency>
-            <groupId>com.reditickets</groupId>
-            <artifactId>seckill-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- gateway 用于路由和网关 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
