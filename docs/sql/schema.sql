@@ -15,8 +15,8 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 1. 用户表
-CREATE TABLE IF NOT EXISTS `t_user` (
-                                        `id`                BIGINT(20)   NOT NULL COMMENT '用户ID（雪花ID）',
+CREATE TABLE `t_user` (
+    `id`                BIGINT(20)   NOT NULL COMMENT '用户ID（雪花ID）',
     `username`          VARCHAR(64)  NOT NULL COMMENT '用户名',
     `password`          VARCHAR(128) NOT NULL COMMENT '密码（BCrypt加密）',
     `phone`             VARCHAR(20)  DEFAULT NULL COMMENT '手机号',
@@ -27,15 +27,11 @@ CREATE TABLE IF NOT EXISTS `t_user` (
     `last_login_time`   DATETIME     DEFAULT NULL COMMENT '最后登录时间',
     `create_time`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `is_deleted`        TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除：0未删 / 1已删',
+    `is_deleted`        TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_username` (`username`),
-    UNIQUE KEY `uk_phone` (`phone`),
--- 状态+逻辑删除联合索引，方便查询正常用户
-    KEY `idx_status_del` (`status`, `is_deleted`),
--- 逻辑删除+创建时间联合索引，方便按时间范围查询
-    KEY `idx_del_create_time` (`is_deleted`, `create_time`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+    UNIQUE KEY `uk_phone` (`phone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 -- 2. 商品表
 CREATE TABLE IF NOT EXISTS `t_product` (

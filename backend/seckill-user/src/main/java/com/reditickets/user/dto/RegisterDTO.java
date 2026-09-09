@@ -17,20 +17,27 @@ import lombok.Data;
 @Data
 public class RegisterDTO {
 
-    /** 用户名，长度 3-32 位 */
+    /** 用户名，4-20位字母/数字/下划线，全局唯一 */
     @NotBlank(message = "用户名不能为空")
-    @Size(min = 3, max = 32, message = "用户名长度需在 3-32 之间")
+    @Size(min = 4, max = 20, message = "用户名长度需在 4-20 之间")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名只能包含字母、数字和下划线")
     private String username;
 
-    /** 密码，长度 6-64 位 */
+    /** 密码，8-20位，至少含字母和数字 */
     @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 64, message = "密码长度需在 6-64 之间")
+    @Size(min = 8, max = 20, message = "密码长度需为 8-20 位")
     private String password;
 
-    /** 手机号，需符合中国大陆手机号格式 */
+    /** 确认密码，必须与 password 一致 */
+    @NotBlank(message = "确认密码不能为空")
+    private String confirmPassword;
+
+    /** 手机号，11位中国大陆手机号，全局唯一 */
+    @NotBlank(message = "手机号不能为空")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String phone;
 
-    /** 邮箱（选填） */
+    /** 邮箱（选填），标准邮箱格式 */
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "邮箱格式不正确")
     private String email;
 }
