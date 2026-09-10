@@ -3,6 +3,7 @@ package com.reditickets.user.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.reditickets.common.result.Result;
+import com.reditickets.common.result.ResultCode;
 import com.reditickets.user.dto.LoginDTO;
 import com.reditickets.user.dto.RegisterDTO;
 import com.reditickets.user.dto.UpdatePasswordDTO;
@@ -15,9 +16,10 @@ import com.reditickets.user.vo.LoginVO;
 import com.reditickets.user.vo.UserFeignVO;
 import com.reditickets.user.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,6 +34,9 @@ import java.util.List;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     /**
      * 用户注册实现
      * <p>
@@ -40,38 +45,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<Void> register(RegisterDTO dto) {
-        // TODO: 1. 校验两次密码是否一致
-        //    if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-        //        return Result.fail(ResultCode.BAD_REQUEST.getCode(), "两次密码输入不一致");
-        //    }
-        //
-        // TODO: 2. 使用 LambdaQueryWrapper 校验用户名是否已存在
-        //    LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        //    wrapper.eq(User::getUsername, dto.getUsername());
-        //    long count = this.count(wrapper);
-        //    if (count > 0) { return Result.fail(ResultCode.USERNAME_EXISTS); }
-        //
-        // TODO: 3. 校验手机号是否已存在
-        //    wrapper = new LambdaQueryWrapper<>();
-        //    wrapper.eq(User::getPhone, dto.getPhone());
-        //    count = this.count(wrapper);
-        //    if (count > 0) { return Result.fail(ResultCode.PHONE_EXISTS); }
-        //
-        // TODO: 4. 使用 BCryptPasswordEncoder 加密密码
-        //    String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        //
-        // TODO: 5. 构建 User 实体并使用 this.save() 保存到数据库
-        //    User user = new User()
-        //        .setUsername(dto.getUsername())
-        //        .setPassword(encodedPassword)
-        //        .setPhone(dto.getPhone())
-        //        .setEmail(dto.getEmail())
-        //        .setStatus(1);
-        //    this.save(user);
-        //
-        // TODO: 6. 返回成功
-        //    return Result.success();
-        throw new UnsupportedOperationException("TODO: 实现注册逻辑");
+        // 1. 校验两次密码是否一致
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            return Result.fail(ResultCode.BAD_REQUEST.getCode(), "两次密码输入不一致");
+        }
+
+        // 2. 使用 LambdaQueryWrapper 校验用户名是否已存在
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, dto.getUsername());
+        long count = this.count(wrapper);
+        if (count > 0) { return Result.fail(ResultCode.USERNAME_EXISTS, "用户名已存在"); }
+
+        // 3. 校验手机号是否已存在
+        wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getPhone, dto.getPhone());
+        count = this.count(wrapper);
+        if (count > 0) { return Result.fail(ResultCode.PHONE_EXISTS, "手机号已存在"); }
+
+        // 4. 使用 BCryptPasswordEncoder 加密密码
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+        // 5. 构建 User 实体并使用 this.save() 保存到数据库
+        User user = new User()
+                .setUsername(dto.getUsername())
+                .setPassword(encodedPassword)
+                .setPhone(dto.getPhone())
+                .setEmail(dto.getEmail())
+                .setStatus(1);
+        this.save(user);
+
+        // 6. 返回成功
+        log.info("用户注册成功: userId={}, username={}, phone={}", user.getId(), dto.getUsername(), dto.getPhone());
+        return Result.success();
     }
 
     /**

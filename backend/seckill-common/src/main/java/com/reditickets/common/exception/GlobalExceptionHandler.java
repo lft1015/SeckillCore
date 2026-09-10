@@ -4,6 +4,7 @@ import com.reditickets.common.result.Result;
 import com.reditickets.common.result.ResultCode;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -86,6 +87,27 @@ public class GlobalExceptionHandler {
     public Result<Void> handleIllegalArgumentException(IllegalArgumentException e) {
         log.warn("非法参数: {}", e.getMessage());
         return Result.fail(ResultCode.BAD_REQUEST.getCode(), e.getMessage());
+    }
+
+    /**
+     * 处理数据库唯一键冲突异常
+     * <p>
+     * 高并发场景下，应用层先查后插的 TOCTOU 窗口期内可能出现并发插入同一条记录，
+     * 数据库唯一索引作为最后防线抛出 DuplicateKeyException，此处拦截并解析为友好提示
+     * </p>
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Result<Void> handleDuplicateKeyException(DuplicateKeyException e) {
+        String message = e.getMessage();
+        if (message != null && message.contains("uk_username")) {
+            return Result.fail(ResultCode.USERNAME_EXISTS);
+        }
+        if (message != null && message.contains("uk_phone")) {
+            return Result.fail(ResultCode.PHONE_EXISTS);
+        }
+        log.warn("数据冲突: {}", message);
+        return Result.fail(ResultCode.CONFLICT);
     }
 
     /**
