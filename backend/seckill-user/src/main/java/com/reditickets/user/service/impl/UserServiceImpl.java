@@ -2,6 +2,7 @@ package com.reditickets.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.reditickets.common.result.Result;
 import com.reditickets.common.result.ResultCode;
@@ -28,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 /**
  * 用户服务实现类
  * <p>
@@ -166,20 +168,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<Void> logout() {
-        // TODO: 1. 从 SecurityContextHolder 或请求头中获取当前用户ID和 Token
-        //    Long userId = getCurrentUserId();
-        //    String token = getCurrentToken();
-        //
-        // TODO: 2. 将 Token 加入 Redis 黑名单（有效期与 Token 过期时间一致）
-        //    stringRedisTemplate.opsForValue().set(
-        //        "token:blacklist:" + token, "1", 2, TimeUnit.HOURS);
-        //
-        // TODO: 3. 删除登录缓存
-        //    stringRedisTemplate.delete("token:" + userId);
-        //
-        // TODO: 4. 返回成功
-        //    return Result.success();
-        throw new UnsupportedOperationException("TODO: 实现登出逻辑");
+        // 1. 从 SecurityContextHolder 或请求头中获取当前用户ID和 Token
+        Long userId = getCurrentUserId();
+        String token = getCurrentToken();
+
+        // 2. 将 Token 加入 Redis 黑名单（有效期与 Token 过期时间一致）
+        stringRedisTemplate.opsForValue().set(
+                "token:blacklist:" + token, "1", 2, TimeUnit.HOURS);
+
+        // 3. 删除登录缓存
+        stringRedisTemplate.delete("token:" + userId);
+
+        // 4. 返回成功
+        return Result.success();
     }
 
     /**
@@ -190,19 +191,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<UserVO> getCurrentUserInfo() {
-        // TODO: 1. 从 SecurityContextHolder 或请求头中获取当前用户ID
-        //    Long userId = getCurrentUserId();
-        //
-        // TODO: 2. 查询用户
-        //    User user = this.getById(userId);
-        //    if (user == null) { return Result.fail(ResultCode.USER_NOT_FOUND); }
-        //
-        // TODO: 3. 转换为 UserVO（手机号脱敏：138****1234）
-        //    UserVO userVO = new UserVO();
-        //    BeanUtils.copyProperties(user, userVO);
-        //    userVO.setPhone(maskPhone(user.getPhone()));
-        //    return Result.success(userVO);
-        throw new UnsupportedOperationException("TODO: 实现获取当前用户信息逻辑");
+        // 1. 从请求头中获取当前用户ID
+        Long userId = getCurrentUserId();
+
+        // 2. 查询用户
+        User user = this.getById(userId);
+        if (user == null) {
+            return Result.fail(ResultCode.USER_NOT_FOUND, "用户不存在");
+        }
+
+        // 3. 转换为 UserVO（手机号脱敏：138****1234）
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        userVO.setPhone(maskPhone(user.getPhone()));
+        return Result.success(userVO);
     }
 
     /**
@@ -213,33 +215,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<UserVO> updateUserInfo(UpdateUserInfoDTO dto) {
-        // TODO: 1. 从 SecurityContextHolder 或请求头中获取当前用户ID
-        //    Long userId = getCurrentUserId();
-        //
-        // TODO: 2. 如果修改手机号，校验唯一性
-        //    if (dto.getPhone() != null) {
-        //        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        //        wrapper.eq(User::getPhone, dto.getPhone())
-        //               .ne(User::getId, userId);
-        //        if (this.count(wrapper) > 0) {
-        //            return Result.fail(ResultCode.PHONE_EXISTS);
-        //        }
-        //    }
-        //
-        // TODO: 3. 使用 LambdaUpdateWrapper 仅更新非空字段
-        //    LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
-        //    updateWrapper.eq(User::getId, userId);
-        //    if (dto.getAvatar() != null) { updateWrapper.set(User::getAvatar, dto.getAvatar()); }
-        //    if (dto.getEmail() != null) { updateWrapper.set(User::getEmail, dto.getEmail()); }
-        //    if (dto.getPhone() != null) { updateWrapper.set(User::getPhone, dto.getPhone()); }
-        //    this.update(updateWrapper);
-        //
-        // TODO: 4. 查询最新用户信息并返回
-        //    User updatedUser = this.getById(userId);
-        //    UserVO userVO = new UserVO();
-        //    BeanUtils.copyProperties(updatedUser, userVO);
-        //    return Result.success(userVO);
-        throw new UnsupportedOperationException("TODO: 实现修改用户信息逻辑");
+        // 1. 从请求头中获取当前用户ID
+        Long userId = getCurrentUserId();
+
+        // 2. 如果修改手机号，校验唯一性
+        if (dto.getPhone() != null) {
+            LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(User::getPhone, dto.getPhone())
+                    .ne(User::getId, userId);
+            if (this.count(wrapper) > 0) {
+                return Result.fail(ResultCode.PHONE_EXISTS, "手机号已存在");
+            }
+        }
+
+        // 3. 使用 LambdaUpdateWrapper 仅更新非空字段
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getId, userId);
+        if (dto.getAvatar() != null) { updateWrapper.set(User::getAvatar, dto.getAvatar()); }
+        if (dto.getEmail() != null) { updateWrapper.set(User::getEmail, dto.getEmail()); }
+        if (dto.getPhone() != null) { updateWrapper.set(User::getPhone, dto.getPhone()); }
+        this.update(updateWrapper);
+
+        // 4. 查询最新用户信息并返回
+        User updatedUser = this.getById(userId);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(updatedUser, userVO);
+        return Result.success(userVO);
     }
 
     /**
@@ -250,35 +251,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<Void> updatePassword(UpdatePasswordDTO dto) {
-        // TODO: 1. 校验两次新密码是否一致
-        //    if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
-        //        return Result.fail(ResultCode.BAD_REQUEST.getCode(), "两次密码输入不一致");
-        //    }
-        //
-        // TODO: 2. 从 SecurityContextHolder 获取当前用户ID并查询用户
-        //    Long userId = getCurrentUserId();
-        //    User user = this.getById(userId);
-        //
-        // TODO: 3. 使用 BCryptPasswordEncoder.matches() 校验旧密码
-        //    if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
-        //        return Result.fail(ResultCode.PASSWORD_ERROR);
-        //    }
-        //
-        // TODO: 4. 校验新旧密码不能相同
-        //    if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
-        //        return Result.fail(ResultCode.BAD_REQUEST.getCode(), "新密码不能与旧密码相同");
-        //    }
-        //
-        // TODO: 5. 加密新密码并更新
-        //    String encodedNewPassword = passwordEncoder.encode(dto.getNewPassword());
-        //    LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
-        //    updateWrapper.eq(User::getId, userId)
-        //        .set(User::getPassword, encodedNewPassword);
-        //    this.update(updateWrapper);
-        //
-        // TODO: 6. 返回成功
-        //    return Result.success();
-        throw new UnsupportedOperationException("TODO: 实现修改密码逻辑");
+        // 1. 校验两次新密码是否一致
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            return Result.fail(ResultCode.BAD_REQUEST.getCode(), "两次密码输入不一致");
+        }
+
+        // 2. 从请求头中获取当前用户ID并查询用户
+        Long userId = getCurrentUserId();
+        User user = this.getById(userId);
+
+        // 3. 使用 BCryptPasswordEncoder 校验旧密码
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+            return Result.fail(ResultCode.PASSWORD_ERROR, "原密码错误");
+        }
+
+        // 4. 校验新旧密码不能相同
+        if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
+            return Result.fail(ResultCode.BAD_REQUEST.getCode(), "新密码不能与旧密码相同");
+        }
+
+        // 5. 加密新密码并更新
+        String encodedNewPassword = passwordEncoder.encode(dto.getNewPassword());
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getId, userId)
+                .set(User::getPassword, encodedNewPassword);
+        this.update(updateWrapper);
+
+        // 6. 返回成功
+        return Result.success();
     }
 
     /**
@@ -289,17 +289,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<UserVO> getUserById(Long userId) {
-        // TODO: 1. 使用 this.getById() 查询用户（ServiceImpl 内置方法）
-        //    User user = this.getById(userId);
-        //
-        // TODO: 2. 校验用户是否存在
-        //    if (user == null) { return Result.fail(ResultCode.USER_NOT_FOUND); }
-        //
-        // TODO: 3. 使用 BeanUtils.copyProperties 转换为 UserVO 返回
-        //    UserVO userVO = new UserVO();
-        //    BeanUtils.copyProperties(user, userVO);
-        //    return Result.success(userVO);
-        throw new UnsupportedOperationException("TODO: 实现查询用户逻辑");
+        // 1. 使用 this.getById() 查询用户（ServiceImpl 内置方法）
+        User user = this.getById(userId);
+
+        // 2. 校验用户是否存在
+        if (user == null) {
+            return Result.fail(ResultCode.USER_NOT_FOUND, "用户不存在");
+        }
+
+        // 3. 转换为 UserVO（手机号脱敏：138****1234）
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        userVO.setPhone(maskPhone(user.getPhone()));
+        return Result.success(userVO);
     }
 
     /**
@@ -310,22 +312,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<List<UserVO>> listUsers(Integer page, Integer size) {
-        // TODO: 1. 使用 MyBatis Plus 分页查询
-        //    Page<User> pageParam = new Page<>(page, size);
-        //    LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        //    wrapper.orderByDesc(User::getCreateTime);
-        //    Page<User> userPage = this.page(pageParam, wrapper);
-        //
-        // TODO: 2. 转换为 UserVO 列表（脱敏）
-        //    List<UserVO> voList = userPage.getRecords().stream().map(user -> {
-        //        UserVO vo = new UserVO();
-        //        BeanUtils.copyProperties(user, vo);
-        //        return vo;
-        //    }).collect(Collectors.toList());
-        //
-        // TODO: 3. 返回结果
-        //    return Result.success(voList);
-        throw new UnsupportedOperationException("TODO: 实现用户列表查询逻辑");
+        // 1. 使用 MyBatis Plus 分页查询
+        Page<User> pageParam = new Page<>(page, size);
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.orderByDesc(User::getCreateTime);
+        Page<User> userPage = this.page(pageParam, wrapper);
+
+        // 2. 转换为 UserVO 列表（手机号脱敏：138****1234）
+        List<UserVO> voList = userPage.getRecords().stream().map(user -> {
+            UserVO vo = new UserVO();
+            BeanUtils.copyProperties(user, vo);
+            vo.setPhone(maskPhone(user.getPhone()));
+            return vo;
+        }).collect(Collectors.toList());
+
+        // 3. 返回结果
+        return Result.success(voList);
     }
 
     /**
@@ -336,25 +338,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<Void> updateUserStatus(UpdateUserStatusDTO dto) {
-        // TODO: 1. 校验目标用户是否存在
-        //    User targetUser = this.getById(dto.getUserId());
-        //    if (targetUser == null) { return Result.fail(ResultCode.USER_NOT_FOUND); }
-        //
-        // TODO: 2. 从 SecurityContextHolder 获取当前管理员ID，不可操作自身
-        //    Long currentUserId = getCurrentUserId();
-        //    if (currentUserId.equals(dto.getUserId())) {
-        //        return Result.fail(403, "不能操作自己的账户");
-        //    }
-        //
-        // TODO: 3. 使用 LambdaUpdateWrapper 更新用户状态
-        //    LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
-        //    updateWrapper.eq(User::getId, dto.getUserId())
-        //        .set(User::getStatus, dto.getStatus());
-        //    this.update(updateWrapper);
-        //
-        // TODO: 4. 返回成功
-        //    return Result.success();
-        throw new UnsupportedOperationException("TODO: 实现用户状态管理逻辑");
+        // 1. 校验目标用户是否存在
+        User targetUser = this.getById(dto.getUserId());
+        if (targetUser == null) {
+            return Result.fail(ResultCode.USER_NOT_FOUND, "用户不存在");
+        }
+
+        // 2. 从请求头中获取当前管理员ID，不可操作自身
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId.equals(dto.getUserId())) {
+            return Result.fail(ResultCode.FORBIDDEN.getCode(), "不能操作自己的账户");
+        }
+
+        // 3. 使用 LambdaUpdateWrapper 更新用户状态
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getId, dto.getUserId())
+                .set(User::getStatus, dto.getStatus());
+        this.update(updateWrapper);
+
+        // 4. 返回成功
+        return Result.success();
     }
 
     /**
@@ -365,41 +368,93 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public UserFeignVO getInternalUser(Long userId) {
-        // TODO: 1. 查询用户
-        //    User user = this.getById(userId);
-        //    if (user == null) { return null; }
-        //
-        // TODO: 2. 转换为 UserFeignVO 返回
-        //    UserFeignVO vo = new UserFeignVO();
-        //    vo.setUserId(user.getId());
-        //    vo.setUsername(user.getUsername());
-        //    vo.setPhone(user.getPhone());
-        //    vo.setStatus(user.getStatus());
-        //    return vo;
-        throw new UnsupportedOperationException("TODO: 实现内部查询用户逻辑");
+        // 1. 查询用户
+        User user = this.getById(userId);
+        if (user == null) {
+            return null;
+        }
+
+        // 2. 转换为 UserFeignVO 返回（手机号脱敏：138****1234）
+        UserFeignVO vo = new UserFeignVO();
+        vo.setUserId(user.getId());
+        vo.setUsername(user.getUsername());
+        vo.setPhone(maskPhone(user.getPhone()));
+        vo.setStatus(user.getStatus());
+        return vo;
     }
 
     /**
      * 批量查询用户信息实现（供 Feign 调用）
      * <p>
-     * 步骤：批量查询用户 → 转换为 UserFeignVO 列表 → 返回
+     * 步骤：批量查询用户 → 转换为 UserFeignVO 列表（手机号脱敏：138****1234） → 返回
      * </p>
      */
     @Override
     public List<UserFeignVO> batchGetInternalUsers(List<Long> userIds) {
-        // TODO: 1. 使用 this.listByIds() 批量查询
-        //    List<User> users = this.listByIds(userIds);
-        //
-        // TODO: 2. 转换为 UserFeignVO 列表
-        //    return users.stream().map(user -> {
-        //        UserFeignVO vo = new UserFeignVO();
-        //        vo.setUserId(user.getId());
-        //        vo.setUsername(user.getUsername());
-        //        vo.setPhone(user.getPhone());
-        //        vo.setStatus(user.getStatus());
-        //        return vo;
-        //    }).collect(Collectors.toList());
-        throw new UnsupportedOperationException("TODO: 实现批量查询用户逻辑");
+        // 1. 使用 this.listByIds() 批量查询用户
+        List<User> users = this.listByIds(userIds);
+
+        // 2. 转换为 UserFeignVO 列表（手机号脱敏：138****1234）
+        return users.stream().map(user -> {
+            UserFeignVO vo = new UserFeignVO();
+            vo.setUserId(user.getId());
+            vo.setUsername(user.getUsername());
+            vo.setPhone(maskPhone(user.getPhone()));
+            vo.setStatus(user.getStatus());
+            return vo;
+        }).collect(Collectors.toList());
+    }
+
+    //=================辅助方法=================
+
+    /**
+     * 手机号脱敏处理
+     * <p>
+     * 将手机号中间四位替换为 ****，例如：138****1234
+     * </p>
+     *
+     * @param phone 原始手机号
+     * @return 脱敏后的手机号
+     */
+    private String maskPhone(String phone) {
+        if (phone == null || phone.length() < 7) {
+            return phone;
+        }
+        return phone.substring(0, 3) + "****" + phone.substring(7);
+    }
+
+    /**
+     * 从请求头中获取当前 JWT Token
+     * <p>
+     * 从 Authorization 请求头中提取 Bearer Token，去除 "Bearer " 前缀
+     * </p>
+     *
+     * @return JWT Token 字符串
+     */
+    private String getCurrentToken() {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
+
+    /**
+     * 从请求头中获取当前登录用户ID
+     * <p>
+     * 从 Authorization 请求头中提取 Token，解析后获取 userId
+     * </p>
+     *
+     * @return 当前用户ID
+     */
+    private Long getCurrentUserId() {
+        // 1. 从请求头中获取 Token
+        String token = getCurrentToken();
+        if (token != null) {
+            // 2. 解析 Token 并获取 userId
+            return jwtUtil.getUserIdFromToken(token);
+        }
+        return null;
     }
 
     /**
@@ -411,14 +466,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return 客户端真实 IP 地址
      */
     private String getClientIp() {
+        // 1. 从 X-Forwarded-For 头获取 IP，优先返回第一个非 unknown 的 IP
         String ip = request.getHeader("X-Forwarded-For");
+        // 2. 如果 X-Forwarded-For 为空或 unknown，再从 X-Real-IP 头获取
         if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+            // 3. 返回第一个非 unknown 的 IP
             return ip.split(",")[0].trim();
         }
+        // 4. 如果 X-Real-IP 为空或 unknown，再从 HttpServletRequest 获取客户端 IP
         ip = request.getHeader("X-Real-IP");
         if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+            // 5. 返回第一个非 unknown 的 IP
             return ip;
         }
+        // 6. 如果 HttpServletRequest 也为空或 unknown，返回默认值
         return request.getRemoteAddr();
     }
 }
