@@ -16,8 +16,8 @@ import lombok.Data;
 public class LoginDTO {
 
     /** 用户名或手机号，不能为空 */
-    @NotBlank(message = "用户名不能为空")
-    private String username;
+    @NotBlank(message = "用户名或手机号不能为空")
+    private String usernameOrPhone;
 
     /** 密码，不能为空 */
     @NotBlank(message = "密码不能为空")

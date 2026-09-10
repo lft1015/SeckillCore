@@ -8,3 +8,7 @@ spring:
       host: 127.0.0.1
       port: 6379
       password: 123456  # Redis密码（可修改为自己的密码）
+
+jwt:
+  secret: SeckillCore2024SecretKeyForJWTTokenGenerationMustBeLongEnough
+  expiration: 7200000  # Token 过期时间（毫秒），默认 2 小时

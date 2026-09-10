@@ -1,9 +1,11 @@
 package com.reditickets.user.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.reditickets.common.result.Result;
 import com.reditickets.common.result.ResultCode;
+import com.reditickets.common.util.JwtUtil;
 import com.reditickets.user.dto.LoginDTO;
 import com.reditickets.user.dto.RegisterDTO;
 import com.reditickets.user.dto.UpdatePasswordDTO;
@@ -16,12 +18,16 @@ import com.reditickets.user.vo.LoginVO;
 import com.reditickets.user.vo.UserFeignVO;
 import com.reditickets.user.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.concurrent.TimeUnit;
 /**
  * 用户服务实现类
  * <p>
@@ -36,6 +42,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private HttpServletRequest request;
 
     /**
      * 用户注册实现
@@ -87,57 +102,60 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Result<LoginVO> login(LoginDTO dto) {
-        // TODO: 1. 使用 LambdaQueryWrapper 根据用户名或手机号查询用户
-        //    LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        //    wrapper.eq(User::getUsername, dto.getUsername())
-        //           .or()
-        //           .eq(User::getPhone, dto.getUsername());
-        //    User user = this.getOne(wrapper);
-        //
-        // TODO: 2. 校验用户是否存在、是否被冻结
-        //    if (user == null) { return Result.fail(ResultCode.USER_NOT_FOUND); }
-        //    if (user.getStatus() == 0) { return Result.fail(ResultCode.USER_FROZEN); }
-        //
-        // TODO: 3. 校验登录失败次数（Redis 计数器，key: user:login:fail:{username}）
-        //    String failKey = "user:login:fail:" + dto.getUsername();
-        //    String failCount = stringRedisTemplate.opsForValue().get(failKey);
-        //    if (failCount != null && Integer.parseInt(failCount) >= 5) {
-        //        return Result.fail(429, "登录失败次数过多，请15分钟后再试");
-        //    }
-        //
-        // TODO: 4. 使用 BCryptPasswordEncoder.matches() 校验密码
-        //    if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-        //        // 记录失败次数
-        //        stringRedisTemplate.opsForValue().increment(failKey);
-        //        stringRedisTemplate.expire(failKey, 15, TimeUnit.MINUTES);
-        //        return Result.fail(ResultCode.PASSWORD_ERROR);
-        //    }
-        //
-        // TODO: 5. 登录成功，清除失败计数
-        //    stringRedisTemplate.delete(failKey);
-        //
-        // TODO: 6. 生成 JWT Token（使用 JJWT 库或类似工具）
-        //    String token = jwtUtil.generateToken(user.getId(), user.getUsername());
-        //
-        // TODO: 7. 将 Token 存入 Redis（用于后续校验和黑名单）
-        //    stringRedisTemplate.opsForValue().set(
-        //        "token:" + user.getId(), token, 2, TimeUnit.HOURS);
-        //
-        // TODO: 8. 使用 LambdaUpdateWrapper 更新最后登录时间和 IP
-        //    LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
-        //    updateWrapper.eq(User::getId, user.getId())
-        //        .set(User::getLastLoginTime, LocalDateTime.now())
-        //        .set(User::getLastLoginIp, ip);
-        //    this.update(updateWrapper);
-        //
-        // TODO: 9. 组装 LoginVO 返回
-        //    UserVO userVO = new UserVO();
-        //    BeanUtils.copyProperties(user, userVO);
-        //    LoginVO loginVO = new LoginVO();
-        //    loginVO.setToken(token);
-        //    loginVO.setUserInfo(userVO);
-        //    return Result.success(loginVO);
-        throw new UnsupportedOperationException("TODO: 实现登录逻辑");
+        // 1. 使用 LambdaQueryWrapper 根据用户名或手机号查询用户
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, dto.getUsernameOrPhone())
+                .or()
+                .eq(User::getPhone, dto.getUsernameOrPhone())
+                .last("LIMIT 1");
+        User user = this.getOne(wrapper);
+
+        // 2. 校验用户是否存在、是否被冻结
+        if (user == null) {
+            return Result.fail(ResultCode.USER_NOT_FOUND, "用户不存在");
+        }
+        if (user.getStatus() == 0) {
+            return Result.fail(ResultCode.USER_FROZEN, "用户已被冻结");
+        }
+
+        // 3. 校验登录失败次数（Redis 计数器，key 基于用户ID，防止用户名/手机号切换绕过）
+        String failKey = "user:login:fail:" + user.getId();
+        String failCount = stringRedisTemplate.opsForValue().get(failKey);
+        if (failCount != null && Integer.parseInt(failCount) >= 5) {
+            return Result.fail(ResultCode.LOGIN_LOCKED, "登录失败次数过多，请15分钟后再试");
+        }
+
+        // 4. BCrypt 验密，失败则记录次数并设置过期
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            stringRedisTemplate.opsForValue().increment(failKey);
+            stringRedisTemplate.expire(failKey, 15, TimeUnit.MINUTES);
+            return Result.fail(ResultCode.PASSWORD_ERROR, "密码错误");
+        }
+
+        // 5. 登录成功，清除失败计数
+        stringRedisTemplate.delete(failKey);
+
+        // 6. 生成 JWT Token
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername());
+
+        // 7. 将 Token 存入 Redis
+        stringRedisTemplate.opsForValue().set("token:" + user.getId(), token, 2, TimeUnit.HOURS);
+
+        // 8. 更新最后登录时间和真实IP
+        String clientIp = getClientIp();
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getId, user.getId())
+                .set(User::getLastLoginTime, LocalDateTime.now())
+                .set(User::getLastLoginIp, clientIp);
+        this.update(updateWrapper);
+
+        // 9. 组装 LoginVO 返回
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        LoginVO loginVO = new LoginVO();
+        loginVO.setToken(token);
+        loginVO.setUserInfo(userVO);
+        return Result.success(loginVO);
     }
 
     /**
@@ -382,5 +400,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         //        return vo;
         //    }).collect(Collectors.toList());
         throw new UnsupportedOperationException("TODO: 实现批量查询用户逻辑");
+    }
+
+    /**
+     * 从 HttpServletRequest 中提取真实客户端 IP
+     * <p>
+     * 优先从反向代理头（X-Forwarded-For、X-Real-IP）获取，兼容 Nginx/网关等场景
+     * </p>
+     *
+     * @return 客户端真实 IP 地址
+     */
+    private String getClientIp() {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip.split(",")[0].trim();
+        }
+        ip = request.getHeader("X-Real-IP");
+        if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+            return ip;
+        }
+        return request.getRemoteAddr();
     }
 }
