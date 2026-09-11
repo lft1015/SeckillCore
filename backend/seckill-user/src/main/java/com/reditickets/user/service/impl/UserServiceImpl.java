@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reditickets.common.result.Result;
 import com.reditickets.common.result.ResultCode;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -105,15 +103,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
 
         // 7. 构建 User 实体并使用 this.save() 保存到数据库
-        // 密码历史记录初始化为包含当前密码的 JSON 数组
-        String initialHistory = "[\"" + encodedPassword + "\"]";
         User user = new User()
                 .setUsername(sanitizedUsername)
                 .setPassword(encodedPassword)
                 .setPhone(dto.getPhone())
                 .setEmail(dto.getEmail() != null ? sanitizeInput(dto.getEmail()) : null)
-                .setStatus(1)
-                .setPasswordHistory(initialHistory);
+                .setStatus(1);
         this.save(user);
 
         // 8. IP 限流计数 +1
@@ -439,57 +434,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return Result.fail(ResultCode.BAD_REQUEST.getCode(), "新密码不能与旧密码相同");
         }
 
-        // 5. 校验密码历史：新密码不能与最近 3 次历史密码相同
-        String passwordHistory = user.getPasswordHistory();
-        if (passwordHistory != null && !passwordHistory.isEmpty()) {
-            try {
-                List<String> historyList = objectMapper.readValue(passwordHistory,
-                        new TypeReference<List<String>>() {});
-                for (String oldHash : historyList) {
-                    if (passwordEncoder.matches(dto.getNewPassword(), oldHash)) {
-                        return Result.fail(ResultCode.PASSWORD_HISTORY_REPEATED);
-                    }
-                }
-            } catch (JsonProcessingException e) {
-                log.warn("解析密码历史失败: userId={}", userId, e);
-            }
-        }
-
-        // 6. 加密新密码并更新
+        // 5. 加密新密码并更新
         String encodedNewPassword = passwordEncoder.encode(dto.getNewPassword());
-
-        // 7. 更新密码历史（保留最近 3 次）
-        List<String> newHistory = new ArrayList<>();
-        newHistory.add(encodedNewPassword);
-        if (passwordHistory != null && !passwordHistory.isEmpty()) {
-            try {
-                List<String> oldHistory = objectMapper.readValue(passwordHistory,
-                        new TypeReference<List<String>>() {});
-                for (String oldHash : oldHistory) {
-                    if (newHistory.size() >= 3) break;
-                    newHistory.add(oldHash);
-                }
-            } catch (JsonProcessingException e) {
-                log.warn("解析密码历史失败: userId={}", userId, e);
-            }
-        }
-        String newHistoryJson;
-        try {
-            newHistoryJson = objectMapper.writeValueAsString(newHistory);
-        } catch (JsonProcessingException e) {
-            newHistoryJson = "[\"" + encodedNewPassword + "\"]";
-        }
 
         LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(User::getId, userId)
-                .set(User::getPassword, encodedNewPassword)
-                .set(User::getPasswordHistory, newHistoryJson);
+                .set(User::getPassword, encodedNewPassword);
         this.update(updateWrapper);
 
-        // 8. 密码修改成功后，立即失效该用户所有 Token
+        // 6. 密码修改成功后，立即失效该用户所有 Token
         invalidateAllUserTokens(userId);
 
-        // 9. 清除用户信息缓存
+        // 7. 清除用户信息缓存
         deleteUserCache(userId);
 
         log.info("密码修改成功: userId={}", userId);

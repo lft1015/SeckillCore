@@ -50,8 +50,6 @@ public enum ResultCode {
     REFRESH_TOKEN_EXPIRED(1008, "登录已过期，请重新登录"),
     /** 刷新令牌已被使用 */
     REFRESH_TOKEN_REUSED(1009, "令牌已被使用，请重新登录"),
-    /** 新密码与历史密码重复 */
-    PASSWORD_HISTORY_REPEATED(1010, "新密码不能与最近使用过的密码相同"),
     /** 密码强度不足 */
     PASSWORD_TOO_WEAK(1011, "密码需包含大写字母、小写字母、数字和特殊字符"),
     /** 注册频率限制 */
