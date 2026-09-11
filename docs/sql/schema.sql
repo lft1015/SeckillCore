@@ -42,13 +42,15 @@ CREATE TABLE IF NOT EXISTS `t_product` (
     `seckill_price`     DECIMAL(10,2) NOT NULL COMMENT '秒杀价',
     `available_stock`   INT(11)       NOT NULL DEFAULT 0 COMMENT '物理可用库存',
     `total_stock`       INT(11)       NOT NULL DEFAULT 0 COMMENT '总库存',
-    `image_url`         VARCHAR(255)  DEFAULT NULL COMMENT '商品主图URL',
+    `image_url`         VARCHAR(500)  DEFAULT NULL COMMENT '商品主图URL',
     `status`            TINYINT(1)    DEFAULT 1 COMMENT '状态：0下架 / 1上架',
     `version`           INT(11)       NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
     `create_time`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_deleted`        TINYINT(1)    NOT NULL DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (`id`),
+-- 商品名索引，支持模糊搜索
+    KEY `idx_product_name` (`product_name`),
 -- 状态+逻辑删除联合索引，方便查询上架商品
     KEY `idx_status_del` (`status`, `is_deleted`),
 -- 秒杀价索引，方便按价格区间查询

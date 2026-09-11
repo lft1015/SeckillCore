@@ -183,7 +183,7 @@
 | :--- | :--- | :---: | :--- |
 | `id` | BIGINT | ✅ | 主键（雪花ID） |
 | `product_name` | VARCHAR(100) | ✅ | 商品名称 |
-| `description` | TEXT | ❌ | 商品描述 |
+| `description` | VARCHAR(500) | ❌ | 商品描述 |
 | `price` | DECIMAL(10,2) | ✅ | 原价 |
 | `seckill_price` | DECIMAL(10,2) | ✅ | 秒杀价 |
 | `available_stock` | INT | ✅ | 可用库存（秒杀可售数量） |
@@ -203,7 +203,7 @@
 CREATE TABLE IF NOT EXISTS `t_product` (
     `id` BIGINT NOT NULL COMMENT '主键（雪花ID）',
     `product_name` VARCHAR(100) NOT NULL COMMENT '商品名称',
-    `description` TEXT COMMENT '商品描述',
+    `description` VARCHAR(500) COMMENT '商品描述',
     `price` DECIMAL(10,2) NOT NULL COMMENT '原价',
     `seckill_price` DECIMAL(10,2) NOT NULL COMMENT '秒杀价',
     `available_stock` INT NOT NULL DEFAULT 0 COMMENT '可用库存',
