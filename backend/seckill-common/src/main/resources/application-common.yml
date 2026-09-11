@@ -12,3 +12,4 @@ spring:
 jwt:
   secret: SeckillCore2024SecretKeyForJWTTokenGenerationMustBeLongEnough
   expiration: 7200000  # Token 过期时间（毫秒），默认 2 小时
+  refresh-expiration: 604800000  # 刷新令牌过期时间（毫秒），默认 7 天

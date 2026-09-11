@@ -2,6 +2,7 @@ package com.reditickets.user.controller;
 
 import com.reditickets.common.result.Result;
 import com.reditickets.user.dto.LoginDTO;
+import com.reditickets.user.dto.RefreshTokenDTO;
 import com.reditickets.user.dto.RegisterDTO;
 import com.reditickets.user.dto.UpdatePasswordDTO;
 import com.reditickets.user.dto.UpdateUserInfoDTO;
@@ -25,7 +26,7 @@ import java.util.List;
 /**
  * 用户控制层
  * <p>
- * 提供用户注册、登录、登出、信息查询、信息修改、密码修改等 REST API 接口，
+ * 提供用户注册、登录、登出、Token 刷新、信息查询、信息修改、密码修改等 REST API 接口，
  * 同时提供内部 Feign 调用接口供其他微服务使用
  * </p>
  *
@@ -46,7 +47,7 @@ public class UserController {
      * @param dto 注册请求参数
      * @return 统一响应结果
      */
-    @PostMapping("/api/user/register")
+    @PostMapping("/api/v1/user/register")
     public Result<Void> register(@Valid @RequestBody RegisterDTO dto) {
         return userService.register(dto);
     }
@@ -54,13 +55,13 @@ public class UserController {
     /**
      * 用户登录接口
      * <p>
-     * 支持用户名/手机号两种方式登录，校验凭证后返回 JWT Token 和用户基本信息
+     * 支持用户名/手机号两种方式登录，校验凭证后返回 JWT 访问令牌和刷新令牌
      * </p>
      *
      * @param dto 登录请求参数
-     * @return 统一响应结果（包含 Token 和用户信息）
+     * @return 统一响应结果（包含 Token、刷新令牌和用户信息）
      */
-    @PostMapping("/api/user/login")
+    @PostMapping("/api/v1/user/login")
     public Result<LoginVO> login(@Valid @RequestBody LoginDTO dto) {
         return userService.login(dto);
     }
@@ -68,15 +69,28 @@ public class UserController {
     /**
      * 用户登出接口
      * <p>
-     * JWT 无状态认证，登出仅需客户端清除 Token。
-     * 服务端可在此记录登出日志或将 Token 加入 Redis 黑名单
+     * 将 Token 加入 Redis 黑名单，同步失效刷新令牌
      * </p>
      *
      * @return 统一响应结果
      */
-    @PostMapping("/api/user/logout")
+    @PostMapping("/api/v1/user/logout")
     public Result<Void> logout() {
         return userService.logout();
+    }
+
+    /**
+     * Token 刷新接口
+     * <p>
+     * 使用刷新令牌获取新的访问令牌，采用滚动刷新策略
+     * </p>
+     *
+     * @param dto 刷新令牌请求参数
+     * @return 统一响应结果（包含新的访问令牌和刷新令牌）
+     */
+    @PostMapping("/api/v1/user/refresh")
+    public Result<LoginVO> refreshToken(@Valid @RequestBody RefreshTokenDTO dto) {
+        return userService.refreshToken(dto);
     }
 
     /**
@@ -87,7 +101,7 @@ public class UserController {
      *
      * @return 统一响应结果（包含用户视图对象）
      */
-    @GetMapping("/api/user/info")
+    @GetMapping("/api/v1/user/info")
     public Result<UserVO> getCurrentUserInfo() {
         return userService.getCurrentUserInfo();
     }
@@ -101,7 +115,7 @@ public class UserController {
      * @param dto 修改信息请求参数
      * @return 统一响应结果（包含最新用户信息）
      */
-    @PutMapping("/api/user/info")
+    @PutMapping("/api/v1/user/info")
     public Result<UserVO> updateUserInfo(@Valid @RequestBody UpdateUserInfoDTO dto) {
         return userService.updateUserInfo(dto);
     }
@@ -109,29 +123,15 @@ public class UserController {
     /**
      * 修改密码
      * <p>
-     * 校验旧密码正确后更新为新密码，密码修改后建议前端引导重新登录
+     * 校验旧密码正确后更新为新密码，密码修改后所有 Token 立即失效，需重新登录
      * </p>
      *
      * @param dto 修改密码请求参数
      * @return 统一响应结果
      */
-    @PutMapping("/api/user/password")
+    @PutMapping("/api/v1/user/password")
     public Result<Void> updatePassword(@Valid @RequestBody UpdatePasswordDTO dto) {
         return userService.updatePassword(dto);
-    }
-
-    /**
-     * 根据用户ID查询用户信息（对外）
-     * <p>
-     * 返回脱敏后的用户基本信息，不包含密码等敏感字段
-     * </p>
-     *
-     * @param id 用户ID
-     * @return 统一响应结果
-     */
-    @GetMapping("/api/user/{id}")
-    public Result<UserVO> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
     }
 
     // ==================== 管理员接口 ====================
@@ -143,7 +143,7 @@ public class UserController {
      * @param size 每页数量
      * @return 用户列表
      */
-    @GetMapping("/api/user/list")
+    @GetMapping("/api/v1/user/list")
     public Result<List<UserVO>> listUsers(@RequestParam(defaultValue = "1") Integer page,
                                           @RequestParam(defaultValue = "10") Integer size) {
         return userService.listUsers(page, size);
@@ -152,13 +152,13 @@ public class UserController {
     /**
      * 冻结/解冻用户（管理员）
      * <p>
-     * 不可操作自身账户，冻结后用户无法登录和参与秒杀
+     * 不可操作自身账户，冻结时立即失效该用户所有 Token
      * </p>
      *
      * @param dto 用户状态修改参数
      * @return 统一响应结果
      */
-    @PutMapping("/api/user/status")
+    @PutMapping("/api/v1/user/status")
     public Result<Void> updateUserStatus(@Valid @RequestBody UpdateUserStatusDTO dto) {
         return userService.updateUserStatus(dto);
     }

@@ -34,6 +34,9 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
+    @Value("${jwt.refresh-expiration:604800000}")
+    private long refreshExpiration;
+
     /**
      * 获取签名密钥
      * <p>
@@ -63,6 +66,29 @@ public class JwtUtil {
                 .subject(String.valueOf(userId))
                 .claim("userId", userId)
                 .claim("username", username)
+                .issuedAt(now)
+                .expiration(expirationDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    /**
+     * 生成 JWT 刷新令牌
+     * <p>
+     * 刷新令牌有效期 7 天，仅用于续期访问令牌，不包含业务数据
+     * </p>
+     *
+     * @param userId 用户ID
+     * @return JWT 刷新令牌字符串
+     */
+    public String generateRefreshToken(Long userId) {
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + refreshExpiration);
+
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .claim("userId", userId)
+                .claim("type", "refresh")
                 .issuedAt(now)
                 .expiration(expirationDate)
                 .signWith(getSigningKey())

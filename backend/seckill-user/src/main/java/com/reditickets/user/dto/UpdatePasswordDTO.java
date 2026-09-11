@@ -1,6 +1,7 @@
 package com.reditickets.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -19,9 +20,11 @@ public class UpdatePasswordDTO {
     @NotBlank(message = "旧密码不能为空")
     private String oldPassword;
 
-    /** 新密码，8-20位，至少含字母和数字 */
+    /** 新密码，8-20位，必须包含大写字母、小写字母、数字、特殊字符 */
     @NotBlank(message = "新密码不能为空")
     @Size(min = 8, max = 20, message = "密码长度需为 8-20 位")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?`~]).{8,20}$",
+            message = "密码需包含大写字母、小写字母、数字和特殊字符")
     private String newPassword;
 
     /** 确认新密码，必须与 newPassword 一致 */

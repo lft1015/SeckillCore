@@ -3,6 +3,7 @@ package com.reditickets.user.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.reditickets.common.result.Result;
 import com.reditickets.user.dto.LoginDTO;
+import com.reditickets.user.dto.RefreshTokenDTO;
 import com.reditickets.user.dto.RegisterDTO;
 import com.reditickets.user.dto.UpdatePasswordDTO;
 import com.reditickets.user.dto.UpdateUserInfoDTO;
@@ -51,6 +52,17 @@ public interface UserService extends IService<User> {
     Result<Void> logout();
 
     /**
+     * Token 刷新
+     * <p>
+     * 使用刷新令牌获取新的访问令牌，采用滚动刷新策略
+     * </p>
+     *
+     * @param dto 刷新令牌请求参数
+     * @return 新的访问令牌和刷新令牌
+     */
+    Result<LoginVO> refreshToken(RefreshTokenDTO dto);
+
+    /**
      * 获取当前登录用户信息
      * <p>
      * 从 Token 中解析用户ID，返回脱敏后的用户详细信息
@@ -81,14 +93,6 @@ public interface UserService extends IService<User> {
      * @return 修改结果
      */
     Result<Void> updatePassword(UpdatePasswordDTO dto);
-
-    /**
-     * 根据用户ID查询用户信息
-     *
-     * @param userId 用户ID
-     * @return 用户视图对象（脱敏）
-     */
-    Result<UserVO> getUserById(Long userId);
 
     /**
      * 获取用户列表（管理员）

@@ -44,6 +44,20 @@ public enum ResultCode {
     PHONE_EXISTS(1005, "手机号已存在"),
     /** 登录失败次数过多 */
     LOGIN_LOCKED(1006, "登录失败次数过多，请15分钟后再试"),
+    /** 刷新令牌无效 */
+    REFRESH_TOKEN_INVALID(1007, "无效的刷新令牌"),
+    /** 刷新令牌已过期 */
+    REFRESH_TOKEN_EXPIRED(1008, "登录已过期，请重新登录"),
+    /** 刷新令牌已被使用 */
+    REFRESH_TOKEN_REUSED(1009, "令牌已被使用，请重新登录"),
+    /** 新密码与历史密码重复 */
+    PASSWORD_HISTORY_REPEATED(1010, "新密码不能与最近使用过的密码相同"),
+    /** 密码强度不足 */
+    PASSWORD_TOO_WEAK(1011, "密码需包含大写字母、小写字母、数字和特殊字符"),
+    /** 注册频率限制 */
+    REGISTER_TOO_FREQUENT(1012, "注册过于频繁，请稍后再试"),
+    /** 请求频率限制 */
+    RATE_LIMITED(1013, "请求过于频繁，请稍后再试"),
     // ========== 商品模块 2000+ ==========
     /** 商品不存在 */
     PRODUCT_NOT_FOUND(2001, "商品不存在"),
