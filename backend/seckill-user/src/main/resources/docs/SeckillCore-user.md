@@ -343,7 +343,7 @@
 5. 若用户不存在，返回 null（调用方需自行处理空值）
 6. 批量查询接口单次最多支持 100 个 userId
 
-> **安全说明**：`/internal/**` 路径在 Gateway 层配置为仅允许内网服务访问，外部请求直接拒绝。
+> **安全说明**：`/api/v1/internal/**` 路径在 Gateway 层配置为仅允许内网服务访问，外部请求直接拒绝。
 
 
 ### 2.9 用户状态管理（管理员功能）
@@ -465,15 +465,15 @@
 
 | 接口名称 | 方法 | 路径 | 是否需要认证 | 限流策略 |
 | :--- | :---: | :--- | :---: | :--- |
-| 用户注册 | POST | `/api/v1/user/register` | ❌ | 单 IP 3次/分钟 |
-| 用户登录 | POST | `/api/v1/user/login` | ❌ | 单 IP 10次/秒 |
-| 用户登出 | POST | `/api/v1/user/logout` | ✅ | — |
-| Token 刷新 | POST | `/api/v1/user/refresh` | ❌（使用刷新令牌） | 单 IP 5次/秒 |
-| 获取当前用户信息 | GET | `/api/v1/user/info` | ✅ | — |
-| 修改用户信息 | PUT | `/api/v1/user/info` | ✅ | — |
-| 修改密码 | PUT | `/api/v1/user/password` | ✅ | — |
-| 获取用户列表（管理员） | GET | `/api/v1/user/list` | ✅（管理员） | — |
-| 冻结/解冻用户（管理员） | PUT | `/api/v1/user/status` | ✅（管理员） | — |
+| 用户注册 | POST | `/api/v1/users` | ❌ | 单 IP 3次/分钟 |
+| 用户登录 | POST | `/api/v1/auth/login` | ❌ | 单 IP 10次/秒 |
+| 用户登出 | DELETE | `/api/v1/auth/session` | ✅ | — |
+| Token 刷新 | POST | `/api/v1/auth/refresh` | ❌（使用刷新令牌） | 单 IP 5次/秒 |
+| 获取当前用户信息 | GET | `/api/v1/users/me` | ✅ | — |
+| 修改用户信息 | PUT | `/api/v1/users/me` | ✅ | — |
+| 修改密码 | PUT | `/api/v1/users/me/password` | ✅ | — |
+| 获取用户列表（管理员） | GET | `/api/v1/users` | ✅（管理员） | — |
+| 冻结/解冻用户（管理员） | PUT | `/api/v1/users/{userId}/status` | ✅（管理员） | — |
 
 > **分页规范**：列表接口默认 `page=1, size=20`，最大 `size=100`。
 
@@ -481,10 +481,10 @@
 
 | 接口名称 | 方法 | 路径 | 说明 |
 | :--- | :---: | :--- | :--- |
-| 查询用户信息 | GET | `/internal/user/{userId}` | 供其他微服务调用，需携带 `X-Internal-Token` |
-| 批量查询用户 | POST | `/internal/user/batch` | 批量查询，单次最多 100 个ID |
+| 查询用户信息 | GET | `/api/v1/internal/users/{userId}` | 供其他微服务调用，需携带 `X-Internal-Token` |
+| 批量查询用户 | POST | `/api/v1/internal/users/batch` | 批量查询，单次最多 100 个ID |
 
-> **安全说明**：`/internal/**` 路径在 Gateway 层配置为仅允许内网服务（注册中心来源）访问，外部请求直接返回 404。
+> **安全说明**：`/api/v1/internal/**` 路径在 Gateway 层配置为仅允许内网服务（注册中心来源）访问，外部请求直接返回 404。
 
 ### 4.3 接口数据格式
 
