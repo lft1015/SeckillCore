@@ -18,6 +18,9 @@ import java.math.BigDecimal;
 @Data
 public class CreateOrderDTO {
 
+    /** 秒杀日志ID（关联幂等） */
+    private Long seckillLogId;
+
     /** 用户ID */
     @NotNull(message = "用户ID不能为空")
     private Long userId;

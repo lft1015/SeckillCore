@@ -30,6 +30,18 @@ public interface OrderService extends IService<Order> {
     Result<OrderVO> createOrder(CreateOrderDTO dto);
 
     /**
+     * 内部创建秒杀订单（供 MQ 消费者调用）
+     * <p>
+     * 与 {@link #createOrder(CreateOrderDTO)} 逻辑相同，
+     * 但直接返回 Order 实体而非 Result 包装，异常直接抛出由调用方处理
+     * </p>
+     *
+     * @param dto 创建订单参数
+     * @return Order 实体
+     */
+    Order createOrderInternal(CreateOrderDTO dto);
+
+    /**
      * 根据订单ID查询订单详情
      *
      * @param orderId 订单ID

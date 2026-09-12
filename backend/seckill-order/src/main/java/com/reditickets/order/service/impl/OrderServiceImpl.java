@@ -42,6 +42,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
      */
     @Override
     public Result<OrderVO> createOrder(CreateOrderDTO dto) {
+        Order order = createOrderInternal(dto);
+
+        OrderVO vo = new OrderVO();
+        BeanUtils.copyProperties(order, vo);
+        return Result.success(vo);
+    }
+
+    @Override
+    public Order createOrderInternal(CreateOrderDTO dto) {
         String orderNo = "SK" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
                 + UUID.randomUUID().toString().replace("-", "").substring(0, 6);
 
@@ -51,6 +60,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setActivityId(dto.getActivityId());
         order.setProductId(dto.getProductId());
         order.setSeckillPrice(dto.getSeckillPrice());
+        order.setSeckillLogId(dto.getSeckillLogId());
         order.setQuantity(dto.getQuantity());
         order.setPayAmount(dto.getSeckillPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
         order.setOrderStatus(0);
@@ -58,14 +68,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         boolean saved = this.save(order);
         if (!saved) {
-            return Result.fail(ResultCode.INTERNAL_ERROR);
+            throw new RuntimeException("订单保存失败");
         }
 
         log.info("订单创建成功 orderNo={} userId={} amount={}", orderNo, dto.getUserId(), order.getPayAmount());
-
-        OrderVO vo = new OrderVO();
-        BeanUtils.copyProperties(order, vo);
-        return Result.success(vo);
+        return order;
     }
 
     /**

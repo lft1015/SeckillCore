@@ -16,6 +16,12 @@ spring:
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/seckill_core?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
 
+rocketmq:
+  name-server: 127.0.0.1:9876
+  consumer:
+    group: seckill-order-consumer-group
+    topic: seckill-order-topic
+
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.reditickets.order.entity
