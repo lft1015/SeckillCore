@@ -16,10 +16,13 @@ import java.time.LocalDateTime;
 @Data
 public class SeckillResultVO {
 
-    /** 订单ID */
+    /** 秒杀日志ID（用于前端轮询查询结果） */
+    private Long seckillLogId;
+
+    /** 订单ID（status=1 时由 Order 服务回写） */
     private Long orderId;
 
-    /** 订单号 */
+    /** 订单号（status=1 时由 Order 服务回写） */
     private String orderNo;
 
     /** 活动ID */
@@ -31,9 +34,12 @@ public class SeckillResultVO {
     /** 秒杀价格 */
     private BigDecimal seckillPrice;
 
-    /** 秒杀状态：0=排队中，1=秒杀成功，2=秒杀失败 */
+    /** 秒杀状态：0=排队中，1=秒杀成功（已下单），2=秒杀失败 */
     private Integer status;
 
-    /** 创建时间 */
+    /** 失败原因（status=2 时有值） */
+    private String failReason;
+
+    /** 秒杀时间 */
     private LocalDateTime createTime;
 }
