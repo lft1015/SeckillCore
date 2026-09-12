@@ -1,7 +1,6 @@
 package com.reditickets.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -103,18 +102,18 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     /**
      * 商品库存扣减实现
      * <p>
-     * 步骤：LambdaUpdateWrapper 乐观锁扣减 → 校验扣减结果 → 同步 Redis 缓存 → 返回
+     * 步骤：查询商品获取当前版本号 → updateById 触发 MyBatis Plus @Version 乐观锁 → 校验扣减结果 → 同步 Redis 缓存 → 返回
      * </p>
      */
     @Override
     public Result<Void> deductStock(Long productId, Integer quantity) {
-        LambdaUpdateWrapper<Product> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.eq(Product::getId, productId)
-                .ge(Product::getAvailableStock, quantity)
-                .eq(Product::getIsDeleted, 0)
-                .setSql("available_stock = available_stock - " + quantity);
+        Product product = this.getById(productId);
+        if (product == null || product.getIsDeleted() == 1 || product.getAvailableStock() < quantity) {
+            return Result.fail(ResultCode.STOCK_NOT_ENOUGH);
+        }
 
-        boolean success = this.update(wrapper);
+        product.setAvailableStock(product.getAvailableStock() - quantity);
+        boolean success = this.updateById(product);
         if (!success) {
             return Result.fail(ResultCode.STOCK_NOT_ENOUGH);
         }
@@ -131,7 +130,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 return objectMapper.readValue(json, ProductVO.class);
             }
         } catch (JsonProcessingException e) {
-            log.warn("商品缓存反序列化失败 key={}", cacheKey, e);
+            log.error("商品缓存反序列化失败 key={}", cacheKey, e);
         }
         return null;
     }
@@ -141,7 +140,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             String json = objectMapper.writeValueAsString(vo);
             stringRedisTemplate.opsForValue().set(cacheKey, json, CACHE_TTL_MINUTES, TimeUnit.MINUTES);
         } catch (JsonProcessingException e) {
-            log.warn("商品缓存序列化失败 key={}", cacheKey, e);
+            log.error("商品缓存序列化失败 key={}", cacheKey, e);
         }
     }
 }

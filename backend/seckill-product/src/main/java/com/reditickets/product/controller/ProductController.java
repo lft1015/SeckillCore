@@ -41,7 +41,7 @@ public class ProductController {
      * @return 统一响应结果（包含分页商品列表）
      */
     @GetMapping("/api/v1/product/list")
-    public Result<Page<ProductVO>> list(ProductListDTO dto) {
+    public Result<Page<ProductVO>> list(@Valid ProductListDTO dto) {
         return productService.listProducts(dto);
     }
 
