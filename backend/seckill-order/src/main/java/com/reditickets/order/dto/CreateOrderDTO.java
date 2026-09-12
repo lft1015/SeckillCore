@@ -1,5 +1,8 @@
 package com.reditickets.order.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -16,17 +19,23 @@ import java.math.BigDecimal;
 public class CreateOrderDTO {
 
     /** 用户ID */
+    @NotNull(message = "用户ID不能为空")
     private Long userId;
 
     /** 活动ID */
+    @NotNull(message = "活动ID不能为空")
     private Long activityId;
 
     /** 商品ID */
+    @NotNull(message = "商品ID不能为空")
     private Long productId;
 
     /** 秒杀价格 */
+    @NotNull(message = "秒杀价格不能为空")
+    @Positive(message = "秒杀价格必须大于0")
     private BigDecimal seckillPrice;
 
     /** 购买数量 */
-    private Integer quantity;
+    @Min(value = 1, message = "购买数量至少为1")
+    private Integer quantity = 1;
 }

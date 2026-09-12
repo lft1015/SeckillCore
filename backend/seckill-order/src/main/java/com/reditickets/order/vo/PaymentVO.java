@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 /**
  * 支付视图对象（VO）
  * <p>
- * 用于接口返回支付信息，包含支付金额、支付方式、支付状态等字段
+ * 用于接口返回支付信息，包含支付金额、支付渠道、支付状态等字段
  * </p>
  *
  * @author gugu
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Data
 public class PaymentVO {
 
-    /** 支付ID */
+    /** 支付流水ID */
     private Long id;
 
     /** 关联订单ID */
@@ -26,13 +26,13 @@ public class PaymentVO {
     private String orderNo;
 
     /** 支付金额 */
-    private BigDecimal amount;
+    private BigDecimal payAmount;
 
-    /** 支付方式：1=支付宝，2=微信 */
-    private Integer payMethod;
+    /** 支付渠道：0=微信，1=支付宝 */
+    private Integer payChannel;
 
-    /** 支付状态：0=待支付，1=支付成功，2=支付失败 */
-    private Integer status;
+    /** 支付状态：0=待支付，1=支付成功，2=支付失败，3=已退款 */
+    private Integer payStatus;
 
     /** 支付时间 */
     private LocalDateTime payTime;

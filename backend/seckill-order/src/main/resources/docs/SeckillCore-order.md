@@ -286,6 +286,8 @@
 | `product_id` | BIGINT | ✅ | 商品ID |
 | `activity_id` | BIGINT | ✅ | 活动ID |
 | `seckill_log_id` | BIGINT | ❌ | 关联秒杀日志ID（用于数据溯源） |
+| `seckill_price` | DECIMAL(10,2) | ✅ | 秒杀价格（下单时快照，避免后续查活动表） |
+| `quantity` | INT | ✅ | 购买数量，默认 1 |
 | `order_status` | TINYINT | ✅ | 0=待支付 / 1=已支付 / 2=已取消 / 3=已退款 |
 | `pay_amount` | DECIMAL(10,2) | ✅ | 实付金额（秒杀价 × 数量） |
 | `pay_time` | DATETIME | ❌ | 支付时间 |
@@ -314,6 +316,8 @@ CREATE TABLE IF NOT EXISTS `t_order` (
     `product_id` BIGINT NOT NULL COMMENT '商品ID',
     `activity_id` BIGINT NOT NULL COMMENT '活动ID',
     `seckill_log_id` BIGINT COMMENT '关联秒杀日志ID',
+    `seckill_price` DECIMAL(10,2) NOT NULL COMMENT '秒杀价格（快照）',
+    `quantity` INT NOT NULL DEFAULT 1 COMMENT '购买数量',
     `order_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0待支付/1已支付/2已取消/3已退款',
     `pay_amount` DECIMAL(10,2) NOT NULL COMMENT '实付金额',
     `pay_time` DATETIME COMMENT '支付时间',

@@ -31,17 +31,17 @@ public class OrderVO {
     /** 商品ID */
     private Long productId;
 
-    /** 秒杀价格 */
+    /** 秒杀价格（快照） */
     private BigDecimal seckillPrice;
 
     /** 购买数量 */
     private Integer quantity;
 
-    /** 订单总金额 */
-    private BigDecimal totalAmount;
+    /** 实付金额 */
+    private BigDecimal payAmount;
 
     /** 订单状态：0=待支付，1=已支付，2=已取消，3=已退款 */
-    private Integer status;
+    private Integer orderStatus;
 
     /** 创建时间 */
     private LocalDateTime createTime;
