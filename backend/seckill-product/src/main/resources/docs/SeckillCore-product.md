@@ -273,8 +273,8 @@ CREATE TABLE IF NOT EXISTS `t_product` (
 
 | 接口名称 | 方法 | 路径 | 是否需要认证 | 说明 |
 | :--- | :---: | :--- | :---: | :--- |
-| 商品列表查询 | GET | `/api/product/list` | ❌ | 分页 + 关键字搜索 + 状态筛选 |
-| 商品详情查询 | GET | `/api/product/detail/{id}` | ❌ | 缓存加速 |
+| 商品列表查询 | GET | `/api/v1/product/list` | ❌ | 分页 + 关键字搜索 + 状态筛选 |
+| 商品详情查询 | GET | `/api/v1/product/detail/{id}` | ❌ | 缓存加速 | |
 
 > **分页规范**：默认 `page=1, size=10`，最大 `size=100`。
 
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS `t_product` (
 
 | 接口名称 | 方法 | 路径 | 说明 |
 | :--- | :---: | :--- | :--- |
-| 库存扣减 | POST | `/api/product/internal/deductStock` | 秒杀模块调用，需携带 `X-Internal-Token` |
+| 库存扣减 | POST | `/api/v1/internal/product/deductStock` | 秒杀模块调用，需携带 `X-Internal-Token` |
 
 > 内部接口在 Gateway 层配置为仅允许内网服务访问。
 
