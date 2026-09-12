@@ -21,9 +21,9 @@ import com.reditickets.user.service.UserService;
 import com.reditickets.user.vo.LoginVO;
 import com.reditickets.user.vo.UserFeignVO;
 import com.reditickets.user.vo.UserVO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,22 +43,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private HttpServletRequest request;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final JwtUtil jwtUtil;
+    private final HttpServletRequest request;
+    private final ObjectMapper objectMapper;
 
     /**
      * 用户注册实现
