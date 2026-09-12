@@ -6,11 +6,12 @@ import com.reditickets.order.dto.CreateOrderDTO;
 import com.reditickets.order.entity.Order;
 import com.reditickets.order.mapper.SeckillLogMapper;
 import com.reditickets.order.service.OrderService;
-import com.reditickets.order.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -42,14 +43,17 @@ public class SeckillOrderConsumer implements RocketMQListener<String> {
     private final OrderService orderService;
     private final SeckillLogMapper seckillLogMapper;
     private final StringRedisTemplate stringRedisTemplate;
+    private final RocketMQTemplate rocketMQTemplate;
     private final ObjectMapper objectMapper;
 
     public SeckillOrderConsumer(OrderService orderService,
                                 SeckillLogMapper seckillLogMapper,
-                                StringRedisTemplate stringRedisTemplate) {
+                                StringRedisTemplate stringRedisTemplate,
+                                RocketMQTemplate rocketMQTemplate) {
         this.orderService = orderService;
         this.seckillLogMapper = seckillLogMapper;
         this.stringRedisTemplate = stringRedisTemplate;
+        this.rocketMQTemplate = rocketMQTemplate;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
     }
@@ -94,6 +98,8 @@ public class SeckillOrderConsumer implements RocketMQListener<String> {
 
             log.info("[订单消费者] 订单创建成功: seckillLogId={}, orderNo={}, userId={}",
                     seckillLogId, order.getOrderNo(), userId);
+
+            sendDelayCancelMessage(order.getId());
 
         } catch (Exception e) {
             log.error("[订单消费者] 订单创建失败: seckillLogId={}, userId={}", seckillLogId, userId, e);
@@ -163,5 +169,16 @@ public class SeckillOrderConsumer implements RocketMQListener<String> {
             return new BigDecimal((String) value);
         }
         return BigDecimal.ZERO;
+    }
+
+    private void sendDelayCancelMessage(Long orderId) {
+        try {
+            rocketMQTemplate.syncSend("order-delay-topic",
+                    MessageBuilder.withPayload(String.valueOf(orderId)).build(),
+                    3000, 5);
+            log.info("[订单消费者] 延时取消消息已发送: orderId={}", orderId);
+        } catch (Exception e) {
+            log.error("[订单消费者] 延时取消消息发送失败: orderId={}", orderId, e);
+        }
     }
 }

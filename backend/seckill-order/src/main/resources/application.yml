@@ -18,9 +18,6 @@ spring:
 
 rocketmq:
   name-server: 127.0.0.1:9876
-  consumer:
-    group: seckill-order-consumer-group
-    topic: seckill-order-topic
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml

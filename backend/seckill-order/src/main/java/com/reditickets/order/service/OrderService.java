@@ -64,4 +64,16 @@ public interface OrderService extends IService<Order> {
      * @return 分页订单列表
      */
     Result<Page<OrderVO>> listUserOrders(OrderListDTO dto);
+
+    /**
+     * 超时取消订单
+     * <p>
+     * 仅处理状态为「待支付」的订单，将状态变更为「已取消」，
+     * 并发送库存回滚消息到 RocketMQ
+     * </p>
+     *
+     * @param orderId 订单ID
+     * @return 取消结果
+     */
+    Result<Void> cancelOrder(Long orderId);
 }

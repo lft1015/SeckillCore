@@ -13,8 +13,10 @@ import com.reditickets.order.service.OrderService;
 import com.reditickets.order.vo.OrderVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,6 +35,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
+
+    private final RocketMQTemplate rocketMQTemplate;
 
     /**
      * 创建秒杀订单实现
@@ -139,5 +143,36 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         });
 
         return Result.success(voPage);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> cancelOrder(Long orderId) {
+        Order order = this.getById(orderId);
+        if (order == null || order.getIsDeleted() == 1) {
+            return Result.fail(ResultCode.ORDER_NOT_FOUND);
+        }
+        if (order.getOrderStatus() != 0) {
+            log.info("[取消订单] 订单状态非待支付，跳过: orderId={}, status={}", orderId, order.getOrderStatus());
+            return Result.success();
+        }
+
+        order.setOrderStatus(2);
+        boolean updated = this.updateById(order);
+        if (!updated) {
+            return Result.fail(ResultCode.ORDER_CANCEL_FAILED);
+        }
+
+        log.info("[取消订单] 超时取消: orderId={}, orderNo={}", orderId, order.getOrderNo());
+
+        try {
+            rocketMQTemplate.convertAndSend("order-stock-rollback-topic",
+                    order.getOrderNo());
+            log.info("[取消订单] 库存回滚消息已发送: orderNo={}", order.getOrderNo());
+        } catch (Exception e) {
+            log.error("[取消订单] 库存回滚消息发送失败: orderNo={}", order.getOrderNo(), e);
+        }
+
+        return Result.success();
     }
 }

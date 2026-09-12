@@ -80,7 +80,9 @@ public enum ResultCode {
     /** 订单不存在 */
     ORDER_NOT_FOUND(5001, "订单不存在"),
     /** 订单取消失败 */
-    ORDER_CANCEL_FAILED(5002, "订单取消失败");
+    ORDER_CANCEL_FAILED(5002, "订单取消失败"),
+    /** 支付处理失败 */
+    PAYMENT_FAILED(5003, "支付处理失败");
 
     private final int code;
     private final String message;

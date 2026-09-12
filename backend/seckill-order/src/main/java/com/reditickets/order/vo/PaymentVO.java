@@ -19,6 +19,9 @@ public class PaymentVO {
     /** 支付流水ID */
     private Long id;
 
+    /** 支付编号（业务唯一标识） */
+    private String paymentNo;
+
     /** 关联订单ID */
     private Long orderId;
 
