@@ -13,7 +13,48 @@ spring:
         file-extension: yaml
     gateway:
       routes:
+        # ========== 用户模块 ==========
+        - id: seckill-user
+          uri: lb://seckill-user
+          predicates:
+            - Path=/api/v1/user/**
+        # ========== 商品模块 ==========
+        - id: seckill-product
+          uri: lb://seckill-product
+          predicates:
+            - Path=/api/v1/product/**
+        # ========== 活动模块 ==========
+        - id: seckill-activity
+          uri: lb://seckill-activity
+          predicates:
+            - Path=/api/v1/activity/**
+        # ========== 订单模块 ==========
+        - id: seckill-order
+          uri: lb://seckill-order
+          predicates:
+            - Path=/api/v1/order/**,/api/v1/payment/**
+        # ========== 秒杀模块 ==========
+        - id: seckill-seckill
+          uri: lb://seckill-seckill
+          predicates:
+            - Path=/api/seckill/**
+        # ========== 接口模块 ==========
         - id: seckill-interface
           uri: lb://seckill-interface
           predicates:
             - Path=/api/**
+
+# ========== JWT 配置 ==========
+jwt:
+  secret: SeckillCoreSecretKeyForJWT2024MustBeAtLeast256Bits!!
+  expiration: 7200000
+  refresh-expiration: 604800000
+
+# ========== 网关认证配置 ==========
+gateway:
+  auth:
+    # 白名单路径（无需认证即可访问）
+    whitelist:
+      - /api/v1/user/login
+      - /api/v1/user/register
+      - /api/v1/user/refresh-token
