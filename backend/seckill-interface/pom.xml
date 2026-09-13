@@ -22,6 +22,36 @@
             <artifactId>seckill-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.reditickets</groupId>
+            <artifactId>seckill-user</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.reditickets</groupId>
+            <artifactId>seckill-product</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.reditickets</groupId>
+            <artifactId>seckill-activity</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.reditickets</groupId>
+            <artifactId>seckill-order</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.reditickets</groupId>
+            <artifactId>seckill-seckill</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
         <!-- spring-boot-starter-web 用于 Web 应用 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

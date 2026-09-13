@@ -14,12 +14,12 @@
     <modules>
         <module>seckill-common</module>
         <module>seckill-gateway</module>
-        <module>seckill-interface</module>
         <module>seckill-user</module>
         <module>seckill-product</module>
+        <module>seckill-activity</module>
         <module>seckill-order</module>
         <module>seckill-seckill</module>
-        <module>seckill-activity</module>
+        <module>seckill-interface</module>
         <module>seckill-launcher</module>
     </modules>
 
@@ -110,6 +110,9 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
+                    <configuration>
+                        <classifier>exec</classifier>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
