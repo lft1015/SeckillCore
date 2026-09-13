@@ -7,7 +7,7 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-      password: 123456  # Redis密码（可修改为自己的密码）
+#      password:   # Redis密码（若有密码，可修改为自己的密码）
 
 jwt:
   secret: SeckillCore2024SecretKeyForJWTTokenGenerationMustBeLongEnough

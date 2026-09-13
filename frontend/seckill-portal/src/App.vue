@@ -1,16 +1,5 @@
-<template>
-  <div id="app">
-    <h1>SeckillCore - 用户端</h1>
-  </div>
-</template>
+<template><RouterView /></template>
 
 <script setup>
+import { RouterView } from 'vue-router'
 </script>
-
-<style>
-#app {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin-top: 40px;
-}
-</style>
