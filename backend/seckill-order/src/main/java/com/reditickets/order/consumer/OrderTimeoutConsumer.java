@@ -5,6 +5,7 @@ import com.reditickets.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(prefix = "rocketmq.consumer", name = "enabled", havingValue = "true")
 @RocketMQMessageListener(
         topic = "order-delay-topic",
         consumerGroup = "order-timeout-consumer-group"

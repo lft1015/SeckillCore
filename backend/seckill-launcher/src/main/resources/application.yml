@@ -22,8 +22,12 @@ spring:
 
 rocketmq:
   name-server: 127.0.0.1:9876
+  access-channel: LOCAL
   producer:
     group: seckill-producer-group
+  consumer:
+    group: seckill-order-consumer-group
+    max-reconsume-times: 3
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml

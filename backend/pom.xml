@@ -33,7 +33,8 @@
         <spring-cloud-alibaba.version>2023.0.0.0-RC1</spring-cloud-alibaba.version>
         <nacos.version>2.4.3</nacos.version>
         <dubbo.version>3.2.0</dubbo.version>
-        <rocketmq.version>2.3.4</rocketmq.version>
+        <rocketmq.version>2.3.0</rocketmq.version>
+        <rocketmq.client.version>5.2.0</rocketmq.client.version>
         <shardingsphere.version>5.5.2</shardingsphere.version>
         <sentinel.version>1.8.8</sentinel.version>
         <seata.version>2.3.0</seata.version>
@@ -79,6 +80,11 @@
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq.client.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.shardingsphere</groupId>
