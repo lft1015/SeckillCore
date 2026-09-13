@@ -14,7 +14,7 @@ import org.apache.ibatis.annotations.Update;
  * @author gugu
  */
 @Mapper
-public interface SeckillLogMapper {
+public interface OrderSeckillLogMapper {
 
     /**
      * 更新秒杀日志为已下单状态

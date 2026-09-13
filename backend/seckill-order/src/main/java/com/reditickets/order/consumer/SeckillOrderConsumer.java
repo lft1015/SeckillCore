@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.reditickets.order.dto.CreateOrderDTO;
 import com.reditickets.order.entity.Order;
-import com.reditickets.order.mapper.SeckillLogMapper;
+import com.reditickets.order.mapper.OrderSeckillLogMapper;
 import com.reditickets.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(prefix = "rocketmq.consumer", name = "enabled", havingValue = "true")
 @RocketMQMessageListener(
         topic = "seckill-order-topic",
         consumerGroup = "seckill-order-consumer-group"
@@ -41,17 +43,17 @@ public class SeckillOrderConsumer implements RocketMQListener<String> {
     private static final long RESULT_CACHE_TTL_MINUTES = 30;
 
     private final OrderService orderService;
-    private final SeckillLogMapper seckillLogMapper;
+    private final OrderSeckillLogMapper orderSeckillLogMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RocketMQTemplate rocketMQTemplate;
     private final ObjectMapper objectMapper;
 
     public SeckillOrderConsumer(OrderService orderService,
-                                SeckillLogMapper seckillLogMapper,
-                                StringRedisTemplate stringRedisTemplate,
-                                RocketMQTemplate rocketMQTemplate) {
-        this.orderService = orderService;
-        this.seckillLogMapper = seckillLogMapper;
+                            OrderSeckillLogMapper orderSeckillLogMapper,
+                            StringRedisTemplate stringRedisTemplate,
+                            RocketMQTemplate rocketMQTemplate) {
+    this.orderService = orderService;
+    this.orderSeckillLogMapper = orderSeckillLogMapper;
         this.stringRedisTemplate = stringRedisTemplate;
         this.rocketMQTemplate = rocketMQTemplate;
         this.objectMapper = new ObjectMapper();
@@ -92,7 +94,7 @@ public class SeckillOrderConsumer implements RocketMQListener<String> {
 
             Order order = orderService.createOrderInternal(dto);
 
-            seckillLogMapper.updateToOrdered(seckillLogId);
+            orderSeckillLogMapper.updateToOrdered(seckillLogId);
 
             writeSuccessCache(seckillLogId, order);
 
@@ -103,7 +105,7 @@ public class SeckillOrderConsumer implements RocketMQListener<String> {
 
         } catch (Exception e) {
             log.error("[订单消费者] 订单创建失败: seckillLogId={}, userId={}", seckillLogId, userId, e);
-            seckillLogMapper.updateToFailed(seckillLogId, "订单创建异常: " + e.getMessage());
+            orderSeckillLogMapper.updateToFailed(seckillLogId, "订单创建异常: " + e.getMessage());
             writeFailCache(seckillLogId, activityId, productId, "系统异常，秒杀失败");
         }
     }
