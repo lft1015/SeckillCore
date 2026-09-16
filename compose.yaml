@@ -1,0 +1,108 @@
+name: seckill-core
+
+services:
+  mysql:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      TZ: Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docs/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  rocketmq-namesrv:
+    image: apache/rocketmq:5.3.1
+    command: sh mqnamesrv
+    restart: unless-stopped
+
+  rocketmq-broker:
+    image: apache/rocketmq:5.3.1
+    command: sh mqbroker -n rocketmq-namesrv:9876
+    depends_on:
+      rocketmq-namesrv:
+        condition: service_started
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/docker/backend/Dockerfile
+    environment:
+      TZ: Asia/Shanghai
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/seckill_core?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      ROCKETMQ_NAME_SERVER: rocketmq-namesrv:9876
+      SPRING_CLOUD_NACOS_DISCOVERY_ENABLED: "false"
+      SPRING_CLOUD_NACOS_CONFIG_ENABLED: "false"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rocketmq-broker:
+        condition: service_started
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    restart: on-failure:5
+
+  portal:
+    build:
+      context: .
+      dockerfile: deploy/docker/frontend/Dockerfile
+      args:
+        APP_DIR: frontend/seckill-portal
+    depends_on:
+      - backend
+    ports:
+      - "${PORTAL_PORT:-3000}:80"
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: .
+      dockerfile: deploy/docker/frontend/Dockerfile
+      args:
+        APP_DIR: frontend/seckill-admin
+    depends_on:
+      - backend
+    ports:
+      - "${ADMIN_PORT:-3001}:80"
+    restart: unless-stopped
+
+  monitor:
+    build:
+      context: .
+      dockerfile: deploy/docker/frontend/Dockerfile
+      args:
+        APP_DIR: frontend/seckill-monitor
+    depends_on:
+      - backend
+    ports:
+      - "${MONITOR_PORT:-3002}:80"
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  redis-data:

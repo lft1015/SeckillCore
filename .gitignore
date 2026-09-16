@@ -5184,3 +5184,5 @@ build/
 /frontend/seckill-portal/node_modules/vue-router/vue-router-auto-resolver.d.mts
 /frontend/seckill-portal/node_modules/vue-router/vue-router-auto-routes.d.ts
 /frontend/seckill-portal/node_modules/.package-lock.json
+/.env
+**/dist/

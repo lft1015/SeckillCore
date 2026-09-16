@@ -1,0 +1,8 @@
+.git
+.idea
+.mvn
+.trae
+**/node_modules
+**/target
+**/dist
+.env
