@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-seckill", url = "${seckill-seckill.url:http://localhost:8080}")
+@FeignClient(name = "seckill-seckill", url = "http://localhost:8080", path = "/api/seckill")
 public interface SeckillFeignClient {
 
-    @PostMapping("/api/seckill/execute")
+    @PostMapping("/execute")
     Result<SeckillResultVO> execute(@RequestBody SeckillExecuteDTO dto);
 
-    @GetMapping("/api/seckill/result/{seckillLogId}")
+    @GetMapping("/result/{seckillLogId}")
     Result<SeckillResultVO> result(@PathVariable("seckillLogId") Long seckillLogId);
 }

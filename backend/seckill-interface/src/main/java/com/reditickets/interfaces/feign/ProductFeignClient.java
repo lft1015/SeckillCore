@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.PathVariable;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-product", url = "${seckill-product.url:http://localhost:8080}")
+@FeignClient(name = "seckill-product", url = "http://localhost:8080", path = "/api/v1/product")
 public interface ProductFeignClient {
 
-    @GetMapping("/api/v1/product/list")
+    @GetMapping("/list")
     Result<Page<ProductVO>> list(@SpringQueryMap ProductListDTO dto);
 
-    @GetMapping("/api/v1/product/detail/{id}")
+    @GetMapping("/detail/{id}")
     Result<ProductVO> detail(@PathVariable("id") Long id);
 }

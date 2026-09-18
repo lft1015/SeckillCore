@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-user", url = "${seckill-user.url:http://localhost:8080}")
+@FeignClient(name = "seckill-user", url = "http://localhost:8080")
 public interface UserFeignClient {
 
     @PostMapping("/api/v1/users")

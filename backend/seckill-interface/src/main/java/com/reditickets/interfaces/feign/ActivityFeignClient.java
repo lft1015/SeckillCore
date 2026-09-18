@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.PathVariable;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-activity", url = "${seckill-activity.url:http://localhost:8080}")
+@FeignClient(name = "seckill-activity", url = "http://localhost:8080", path = "/api/v1/activity")
 public interface ActivityFeignClient {
 
-    @GetMapping("/api/v1/activity/list")
+    @GetMapping("/list")
     Result<Page<ActivityVO>> list(@SpringQueryMap ActivityListDTO dto);
 
-    @GetMapping("/api/v1/activity/detail/{id}")
+    @GetMapping("/detail/{id}")
     Result<ActivityVO> detail(@PathVariable("id") Long id);
 }

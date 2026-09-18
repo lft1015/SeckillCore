@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.PathVariable;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-order", url = "${seckill-order.url:http://localhost:8080}")
+@FeignClient(name = "seckill-order", url = "http://localhost:8080", path = "/api/v1/order")
 public interface OrderFeignClient {
 
-    @GetMapping("/api/v1/order/list")
+    @GetMapping("/list")
     Result<Page<OrderVO>> list(@SpringQueryMap OrderListDTO dto);
 
-    @GetMapping("/api/v1/order/detail/{id}")
+    @GetMapping("/detail/{id}")
     Result<OrderVO> detail(@PathVariable("id") Long id);
 
-    @GetMapping("/api/v1/order/no/{orderNo}")
+    @GetMapping("/no/{orderNo}")
     Result<OrderVO> detailByNo(@PathVariable("orderNo") String orderNo);
 }
