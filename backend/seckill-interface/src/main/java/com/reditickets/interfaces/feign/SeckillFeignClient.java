@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-seckill")
+@FeignClient(name = "seckill-seckill", url = "${seckill-seckill.url:http://localhost:8080}")
 public interface SeckillFeignClient {
 
     @PostMapping("/api/seckill/execute")

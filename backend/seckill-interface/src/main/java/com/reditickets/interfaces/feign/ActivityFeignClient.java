@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-activity")
+@FeignClient(name = "seckill-activity", url = "${seckill-activity.url:http://localhost:8080}")
 public interface ActivityFeignClient {
 
     @GetMapping("/api/v1/activity/list")

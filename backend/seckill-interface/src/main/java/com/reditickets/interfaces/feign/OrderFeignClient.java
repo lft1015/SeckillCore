@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  *
  * @author gugu
  */
-@FeignClient(name = "seckill-order")
+@FeignClient(name = "seckill-order", url = "${seckill-order.url:http://localhost:8080}")
 public interface OrderFeignClient {
 
     @GetMapping("/api/v1/order/list")
