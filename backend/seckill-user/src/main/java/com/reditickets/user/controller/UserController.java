@@ -66,8 +66,8 @@ public class UserController {
      * @return 用户列表
      */
     @GetMapping("/api/v1/users")
-    public Result<List<UserVO>> listUsers(@RequestParam(defaultValue = "1") Integer page,
-                                          @RequestParam(defaultValue = "10") Integer size) {
+    public Result<List<UserVO>> listUsers(@RequestParam(name = "page", defaultValue = "1") Integer page,
+                                          @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return userService.listUsers(page, size);
     }
 

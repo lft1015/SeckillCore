@@ -1,22 +1,16 @@
 -- SeckillCore deterministic local fixture data.
 -- Login credentials: demo_user / password.
 USE `seckill_core`;
-
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Add the order snapshot fields when this script is applied to an older database.
 SET @has_seckill_price = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 't_order' AND COLUMN_NAME = 'seckill_price');
 SET @has_quantity = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 't_order' AND COLUMN_NAME = 'quantity');
-SET @alter_price = IF(@has_seckill_price = 0,
-    'ALTER TABLE t_order ADD COLUMN seckill_price DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER seckill_log_id',
-    'SELECT 1');
+SET @alter_price = IF(@has_seckill_price = 0, 'ALTER TABLE t_order ADD COLUMN seckill_price DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER seckill_log_id', 'SELECT 1');
 PREPARE alter_price_stmt FROM @alter_price;
 EXECUTE alter_price_stmt;
 DEALLOCATE PREPARE alter_price_stmt;
-SET @alter_quantity = IF(@has_quantity = 0,
-    'ALTER TABLE t_order ADD COLUMN quantity INT NOT NULL DEFAULT 1 AFTER seckill_price',
-    'SELECT 1');
+SET @alter_quantity = IF(@has_quantity = 0, 'ALTER TABLE t_order ADD COLUMN quantity INT NOT NULL DEFAULT 1 AFTER seckill_price', 'SELECT 1');
 PREPARE alter_quantity_stmt FROM @alter_quantity;
 EXECUTE alter_quantity_stmt;
 DEALLOCATE PREPARE alter_quantity_stmt;
@@ -29,25 +23,25 @@ ON DUPLICATE KEY UPDATE username = VALUES(username), password = VALUES(password)
 
 INSERT INTO `t_product` (`id`, `product_name`, `description`, `price`, `seckill_price`, `available_stock`, `total_stock`, `image_url`, `status`, `version`, `create_time`, `update_time`, `is_deleted`)
 VALUES
-    (2000000000000000001, '旗舰降噪耳机', '沉浸式音频体验，限时秒杀。', 899.00, 599.00, 97, 100, NULL, 1, 0, NOW(), NOW(), 0),
-    (2000000000000000002, '智能保温杯', '通勤便携，长效保温。', 199.00, 99.00, 40, 40, NULL, 1, 0, NOW(), NOW(), 0),
-    (2000000000000000003, '限量纪念礼盒', '已下架商品，用于验证状态筛选。', 299.00, 199.00, 0, 20, NULL, 0, 0, NOW(), NOW(), 0)
+    (2000000000000000001, 'Noise Cancelling Headphones', 'Immersive audio experience', 899.00, 599.00, 97, 100, NULL, 1, 0, NOW(), NOW(), 0),
+    (2000000000000000002, 'Smart Thermos', 'Portable long-lasting insulation', 199.00, 99.00, 40, 40, NULL, 1, 0, NOW(), NOW(), 0),
+    (2000000000000000003, 'Limited Gift Box', 'Discontinued product for status testing', 299.00, 199.00, 0, 20, NULL, 0, 0, NOW(), NOW(), 0)
 ON DUPLICATE KEY UPDATE product_name = VALUES(product_name), description = VALUES(description), price = VALUES(price), seckill_price = VALUES(seckill_price), available_stock = VALUES(available_stock), total_stock = VALUES(total_stock), status = VALUES(status), is_deleted = 0;
 
 INSERT INTO `t_activity` (`id`, `activity_name`, `product_id`, `seckill_price`, `total_limit`, `remaining_limit`, `start_time`, `end_time`, `per_user_limit`, `status`, `version`, `create_time`, `update_time`, `is_deleted`)
 VALUES
-    (3000000000000000001, '即将开始场', 2000000000000000001, 599.00, 100, 100, DATE_ADD(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 2 DAY), 1, 0, 0, NOW(), NOW(), 0),
-    (3000000000000000002, '正在进行场', 2000000000000000001, 599.00, 100, 97, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_ADD(NOW(), INTERVAL 1 DAY), 1, 1, 0, NOW(), NOW(), 0),
-    (3000000000000000003, '已结束场', 2000000000000000002, 99.00, 40, 0, DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), 1, 2, 0, NOW(), NOW(), 0),
-    (3000000000000000004, '已取消场', 2000000000000000003, 199.00, 20, 20, DATE_ADD(NOW(), INTERVAL 2 DAY), DATE_ADD(NOW(), INTERVAL 3 DAY), 1, 3, 0, NOW(), NOW(), 0)
+    (3000000000000000001, 'Upcoming Session', 2000000000000000001, 599.00, 100, 100, DATE_ADD(NOW(), INTERVAL 1 DAY), DATE_ADD(NOW(), INTERVAL 2 DAY), 1, 0, 0, NOW(), NOW(), 0),
+    (3000000000000000002, 'Running Session', 2000000000000000001, 599.00, 100, 97, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_ADD(NOW(), INTERVAL 1 DAY), 1, 1, 0, NOW(), NOW(), 0),
+    (3000000000000000003, 'Finished Session', 2000000000000000002, 99.00, 40, 0, DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), 1, 2, 0, NOW(), NOW(), 0),
+    (3000000000000000004, 'Cancelled Session', 2000000000000000003, 199.00, 20, 20, DATE_ADD(NOW(), INTERVAL 2 DAY), DATE_ADD(NOW(), INTERVAL 3 DAY), 1, 3, 0, NOW(), NOW(), 0)
 ON DUPLICATE KEY UPDATE activity_name = VALUES(activity_name), product_id = VALUES(product_id), seckill_price = VALUES(seckill_price), total_limit = VALUES(total_limit), remaining_limit = VALUES(remaining_limit), start_time = VALUES(start_time), end_time = VALUES(end_time), status = VALUES(status), is_deleted = 0;
 
 INSERT INTO `t_seckill_log` (`id`, `user_id`, `product_id`, `activity_id`, `status`, `fail_reason`, `seckill_time`, `create_time`, `update_time`, `is_deleted`)
 VALUES
     (4000000000000000001, 1000000000000000001, 2000000000000000001, 3000000000000000002, 0, NULL, NOW(), NOW(), NOW(), 0),
     (4000000000000000002, 1000000000000000002, 2000000000000000001, 3000000000000000002, 1, NULL, DATE_SUB(NOW(), INTERVAL 10 MINUTE), DATE_SUB(NOW(), INTERVAL 10 MINUTE), NOW(), 0),
-    (4000000000000000003, 1000000000000000001, 2000000000000000002, 3000000000000000003, 2, '活动已结束', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), NOW(), 0),
-    (4000000000000000004, 1000000000000000002, 2000000000000000003, 3000000000000000004, 3, '活动已取消', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY), NOW(), 0)
+    (4000000000000000003, 1000000000000000001, 2000000000000000002, 3000000000000000003, 2, 'Activity finished', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), NOW(), 0),
+    (4000000000000000004, 1000000000000000002, 2000000000000000003, 3000000000000000004, 3, 'Activity cancelled', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY), NOW(), 0)
 ON DUPLICATE KEY UPDATE status = VALUES(status), fail_reason = VALUES(fail_reason), update_time = NOW(), is_deleted = 0;
 
 INSERT INTO `t_order` (`id`, `order_no`, `user_id`, `product_id`, `activity_id`, `seckill_log_id`, `seckill_price`, `quantity`, `order_status`, `pay_amount`, `pay_time`, `expire_time`, `create_time`, `update_time`, `is_deleted`)
