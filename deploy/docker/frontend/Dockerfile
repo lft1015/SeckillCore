@@ -4,10 +4,12 @@ FROM node:20-alpine AS build
 ARG APP_DIR
 
 WORKDIR /workspace/${APP_DIR}
-COPY ${APP_DIR}/package.json ${APP_DIR}/package-lock.json ./
-RUN npm ci
+
+# 复制前端项目所有源文件（node_modules 和 dist 已被 .dockerignore 排除）
 COPY ${APP_DIR}/ ./
-RUN npm run build
+
+# 安装依赖并构建
+RUN npm install && npm run build
 
 FROM nginx:1.27-alpine
 ARG APP_DIR

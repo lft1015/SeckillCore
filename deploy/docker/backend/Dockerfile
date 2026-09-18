@@ -12,4 +12,4 @@ COPY --from=build /workspace/backend/seckill-launcher/target/*-exec.jar /app/app
 
 USER spring
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-Dcsp.sentinel.log.dir=/tmp", "-Dcsp.sentinel.app.type=0", "-jar", "/app/app.jar"]
