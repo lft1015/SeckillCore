@@ -55,7 +55,7 @@ public class ProductController {
      * @return 统一响应结果（包含商品详情视图对象）
      */
     @GetMapping("/api/v1/product/detail/{id}")
-    public Result<ProductVO> detail(@PathVariable Long id) {
+    public Result<ProductVO> detail(@PathVariable("id") Long id) {
         return productService.getProductById(id);
     }
 

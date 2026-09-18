@@ -123,7 +123,7 @@ public class UserController {
      * @return 统一响应结果
      */
     @PutMapping("/api/v1/users/{userId}/status")
-    public Result<Void> updateUserStatus(@PathVariable Long userId,
+    public Result<Void> updateUserStatus(@PathVariable("userId") Long userId,
                                          @Valid @RequestBody UpdateUserStatusDTO dto) {
         dto.setUserId(userId);
         return userService.updateUserStatus(dto);
@@ -181,7 +181,7 @@ public class UserController {
      * @return 用户Feign视图对象
      */
     @GetMapping("/api/v1/internal/users/{userId}")
-    public UserFeignVO getInternalUser(@PathVariable Long userId) {
+    public UserFeignVO getInternalUser(@PathVariable("userId") Long userId) {
         return userService.getInternalUser(userId);
     }
 

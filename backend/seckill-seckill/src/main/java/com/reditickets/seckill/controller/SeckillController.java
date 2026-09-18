@@ -61,7 +61,7 @@ public class SeckillController {
      */
     @GetMapping("/result/{seckillLogId}")
     @SentinelResource(value = "seckillResult", blockHandler = "handleResultBlock")
-    public Result<SeckillResultVO> result(@PathVariable Long seckillLogId) {
+    public Result<SeckillResultVO> result(@PathVariable("seckillLogId") Long seckillLogId) {
         return seckillService.getSeckillResult(seckillLogId);
     }
 

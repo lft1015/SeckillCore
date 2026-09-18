@@ -53,7 +53,7 @@ public class ActivityController {
      * @return 活动详情视图对象
      */
     @GetMapping("/api/v1/activity/detail/{id}")
-    public Result<ActivityVO> detail(@PathVariable Long id) {
+    public Result<ActivityVO> detail(@PathVariable("id") Long id) {
         return activityService.getActivityById(id);
     }
 

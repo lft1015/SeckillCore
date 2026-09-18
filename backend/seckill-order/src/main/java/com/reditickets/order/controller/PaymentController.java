@@ -85,7 +85,7 @@ public class PaymentController {
      * @return 支付流水视图对象
      */
     @GetMapping("/info/{orderId}")
-    public Result<PaymentVO> paymentInfo(@PathVariable Long orderId) {
+    public Result<PaymentVO> paymentInfo(@PathVariable("orderId") Long orderId) {
         return paymentService.getPaymentByOrderId(orderId);
     }
 }

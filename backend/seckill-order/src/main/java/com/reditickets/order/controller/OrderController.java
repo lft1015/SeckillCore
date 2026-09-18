@@ -52,7 +52,7 @@ public class OrderController {
      * @return 订单详情视图对象
      */
     @GetMapping("/api/v1/order/detail/{id}")
-    public Result<OrderVO> detail(@PathVariable Long id) {
+    public Result<OrderVO> detail(@PathVariable("id") Long id) {
         return orderService.getOrderById(id);
     }
 
@@ -66,7 +66,7 @@ public class OrderController {
      * @return 订单详情视图对象
      */
     @GetMapping("/api/v1/order/no/{orderNo}")
-    public Result<OrderVO> detailByNo(@PathVariable String orderNo) {
+    public Result<OrderVO> detailByNo(@PathVariable("orderNo") String orderNo) {
         return orderService.getOrderByOrderNo(orderNo);
     }
 

@@ -1,0 +1,1 @@
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; public class HashCheck { public static void main(String[] a) { System.out.println(new BCryptPasswordEncoder().matches("password", a[0])); System.out.println(new BCryptPasswordEncoder().encode("password")); }}

@@ -13,6 +13,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./docs/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./docs/sql/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s

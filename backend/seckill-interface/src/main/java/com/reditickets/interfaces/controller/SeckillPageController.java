@@ -45,7 +45,7 @@ public class SeckillPageController {
      * @return 聚合后的秒杀页面视图对象
      */
     @GetMapping("/seckill-page/{activityId}")
-    public Result<SeckillPageVO> seckillPage(@PathVariable Long activityId,
+    public Result<SeckillPageVO> seckillPage(@PathVariable("activityId") Long activityId,
                                              @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         Result<ActivityVO> activityResult = activityFeignClient.detail(activityId);
         if (activityResult.getCode() != ResultCode.SUCCESS.getCode() || activityResult.getData() == null) {

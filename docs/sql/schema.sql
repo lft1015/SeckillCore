@@ -159,4 +159,8 @@ CREATE TABLE IF NOT EXISTS `t_payment` (
     KEY `idx_pay_status_del` (`pay_status`, `is_deleted`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付流水表';
 
+ALTER TABLE `t_order`
+    ADD COLUMN `seckill_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT '秒杀价快照' AFTER `seckill_log_id`,
+    ADD COLUMN `quantity` INT(11) NOT NULL DEFAULT 1 COMMENT '购买数量' AFTER `seckill_price`;
+
 SET FOREIGN_KEY_CHECKS = 1;
